@@ -90,6 +90,13 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
+      - name: Debug files before SCP
+        run: |
+          pwd
+          ls -al
+          find . -maxdepth 4 -name "docker-compose.*" -print
+          ls -al nginx || true
+          find nginx -maxdepth 4 -type f -print || true
       - name: Copy Docker Compose file to Server
         uses: appleboy/scp-action@v0.1.7
         with:

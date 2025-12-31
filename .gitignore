@@ -32,6 +32,6 @@ replay_pid*
 *.iml
 .DS_Store
 
-nginx/nginx.conf
+
 .gradle/
 ./bin

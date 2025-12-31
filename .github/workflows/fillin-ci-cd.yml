@@ -118,6 +118,11 @@ jobs:
           script: |
             cd /home/ubuntu/fillin
             
+            cat > .env <<EOF
+            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            EOF
+            chmod 600 .env
+            
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fillin:latest
             
             docker compose down

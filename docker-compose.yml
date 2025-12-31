@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: fillin-server
+    image: ${DOCKERHUB_USERNAME}/fillin:latest
+    env_file:
+      - .env
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - TZ=Asia/Seoul
+    networks:
+      - fillin_network
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    restart: always
+    ports:
+      - "80:80"   # HTTP
+      # - "443:443" # HTTPS (나중에 인증서 받으면 주석 해제)
+    volumes:
+      # Nginx 설정 파일을 밖에서 넣어줌 (아래 2단계에서 만들 파일)
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - backend # 백엔드가 켜져야 Nginx도 켜짐
+    networks:
+      - fillin_network
+
+networks:
+  fillin_network:
+    driver: bridge

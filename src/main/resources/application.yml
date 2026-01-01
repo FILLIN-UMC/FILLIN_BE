@@ -36,6 +36,12 @@ server:
     mbeanregistry:
       enabled: true
 
+jwt:
+
+  # 1시간
+  # 2주
+
+
 springdoc:
   api-docs:
     enabled: true

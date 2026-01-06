@@ -106,10 +106,10 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.KEY_PEM }}
-          source: "docker-compose.yml,nginx/**"
+          source: "docker-compose.yml,deploy.sh,nginx/**"
           target: "/home/ubuntu/fillin/" # 서버에 이 폴더가 미리 있어야 합니다
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2 (Blue/Green)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -117,15 +117,12 @@ jobs:
           key: ${{ secrets.KEY_PEM }}
           script: |
             cd /home/ubuntu/fillin
-            
             cat > .env <<EOF
             DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
             EOF
             chmod 600 .env
             
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fillin:latest
-            
-            docker compose down
-            docker compose up -d
-            
-            docker image prune -af
+              
+            chmod +x deploy.sh
+            ./deploy.sh

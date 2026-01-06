@@ -19,7 +19,15 @@ spring:
       connection-test-query: SELECT 1
       pool-name: FillinHikariPool
 
-
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health
+    endpoint:
+      health:
+        probes:
+          enabled: true
   jpa:
     hibernate:
       ddl-auto: update

@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  backend-blue:
+  backend:
     container_name: fillin-blue
     image: ${DOCKERHUB_USERNAME}/fillin:latest
     env_file:
@@ -13,32 +13,7 @@ services:
       - "8080"
     networks:
       - fillin_network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 20s
-
-  backend-green:
-    container_name: fillin-green
-    image: ${DOCKERHUB_USERNAME}/fillin:latest
-    env_file:
-      - .env
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - TZ=Asia/Seoul
-    expose:
-      - "8080"
-    networks:
-      - fillin_network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 20s
-
+    restart: unless-stopped
 
   nginx:
     container_name: nginx
@@ -50,10 +25,10 @@ services:
       # Nginx 설정 파일을 밖에서 넣어줌 (아래 2단계에서 만들 파일)
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
-      - backend-blue
-
+      - backend
     networks:
       - fillin_network
+    restart: always
 
 networks:
   fillin_network:

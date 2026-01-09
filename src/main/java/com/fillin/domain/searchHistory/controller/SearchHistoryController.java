@@ -57,7 +57,34 @@ public class SearchHistoryController {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
         searchHistoryService.saveSearchKeyword(member, request.getKeyword().trim());
-        
+
         return Response.ok();
+    }
+
+    @DeleteMapping("/recent/{id}")
+    public Response<Void> deleteSearchHistory(
+            @AuthenticationPrincipal Member member,
+            @PathVariable Long id
+    ) {
+        if (member == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        searchHistoryService.deleteSearchHistory(member, id);
+
+        return Response.ok(null);
+    }
+
+    @DeleteMapping("/recent/all")
+    public Response<Void> deleteAllSearchHistories(
+            @AuthenticationPrincipal Member member
+    ) {
+        if (member == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        searchHistoryService.deleteAllSearchHistory(member);
+
+        return Response.ok(null);
     }
 }

@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SearchHistoryService {
+
     private final SearchHistoryRepository searchHistoryRepository;
 
     public Slice<SearchHistory> getRecentSearches(
@@ -52,5 +53,17 @@ public class SearchHistoryService {
                         )
 
                 );
+    }
+
+    public void deleteSearchHistory(Member member, Long searchHistoryId) {
+        SearchHistory history = searchHistoryRepository
+                .findByIdAndMember(searchHistoryId, member)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+
+        searchHistoryRepository.delete(history);
+    }
+
+    public void deleteAllSearchHistory(Member member) {
+        searchHistoryRepository.deleteAllByMember(member);
     }
 }

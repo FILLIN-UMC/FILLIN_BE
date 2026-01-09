@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SearchHistory {
 
@@ -19,4 +21,8 @@ public class SearchHistory {
     private String keyword;
 
     private LocalDateTime searchAt;
+
+    public void updateSearchAt(LocalDateTime time) {
+        this.searchAt = time;
+    }
 }

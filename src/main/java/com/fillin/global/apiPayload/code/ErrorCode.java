@@ -13,7 +13,11 @@ public enum ErrorCode implements BaseCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON400", "잘못된 요청입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COMMON401", "인증이 필요합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
-    NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON404", "찾을 수 없는 요청입니다.");
+    NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON404", "찾을 수 없는 요청입니다."),
+
+    // USER Error
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND,"USER404","사용자를 찾을 수 없습니다."),
+    DUPLICATE_NICKNAME(HttpStatus.MULTI_STATUS,"USER4031","중복된 닉네임입니다.");
 
 
     private final HttpStatus status;

@@ -1,4 +1,4 @@
-package com.fillin.domain.searchHistory.dto.request;
+package com.fillin.dto.searchHistory.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

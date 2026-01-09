@@ -1,6 +1,6 @@
-package com.fillin.domain.searchHistory.dto.response;
+package com.fillin.dto.searchHistory.response;
 
-import com.fillin.domain.searchHistory.entity.SearchHistory;
+import com.fillin.domain.SearchHistory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

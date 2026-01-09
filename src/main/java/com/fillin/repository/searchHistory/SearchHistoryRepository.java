@@ -1,7 +1,7 @@
-package com.fillin.domain.searchHistory.repository;
+package com.fillin.repository.searchHistory;
 
 import com.fillin.domain.Member;
-import com.fillin.domain.searchHistory.entity.SearchHistory;
+import com.fillin.domain.SearchHistory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,5 @@
-package com.fillin.domain.searchHistory.entity;
+package com.fillin.domain;
 
-import com.fillin.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

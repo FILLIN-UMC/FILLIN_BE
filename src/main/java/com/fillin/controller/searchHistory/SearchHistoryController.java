@@ -1,11 +1,11 @@
-package com.fillin.domain.searchHistory.controller;
+package com.fillin.controller.searchHistory;
 
 import com.fillin.domain.Member;
-import com.fillin.domain.searchHistory.dto.request.SearchHistoryCreateRequest;
-import com.fillin.domain.searchHistory.dto.response.RecentSearchListResponse;
-import com.fillin.domain.searchHistory.dto.response.SearchHistoryResponse;
-import com.fillin.domain.searchHistory.entity.SearchHistory;
-import com.fillin.domain.searchHistory.service.SearchHistoryService;
+import com.fillin.domain.SearchHistory;
+import com.fillin.dto.searchHistory.request.SearchHistoryCreateRequest;
+import com.fillin.dto.searchHistory.response.RecentSearchListResponse;
+import com.fillin.dto.searchHistory.response.SearchHistoryResponse;
+import com.fillin.service.searchHistory.SearchHistoryService;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.exception.BusinessException;
 import com.fillin.global.apiPayload.response.Response;

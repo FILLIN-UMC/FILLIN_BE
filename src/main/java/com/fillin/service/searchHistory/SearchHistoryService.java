@@ -1,8 +1,8 @@
-package com.fillin.domain.searchHistory.service;
+package com.fillin.service.searchHistory;
 
 import com.fillin.domain.Member;
-import com.fillin.domain.searchHistory.entity.SearchHistory;
-import com.fillin.domain.searchHistory.repository.SearchHistoryRepository;
+import com.fillin.domain.SearchHistory;
+import com.fillin.repository.searchHistory.SearchHistoryRepository;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.exception.BusinessException;
 import lombok.RequiredArgsConstructor;

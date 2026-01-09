@@ -1,4 +1,4 @@
-package com.fillin.domain.searchHistory.dto.response;
+package com.fillin.dto.searchHistory.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

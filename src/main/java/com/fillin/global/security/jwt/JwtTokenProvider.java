@@ -2,6 +2,7 @@ package com.fillin.global.security.jwt;
 
 
 import com.fillin.domain.Member;
+import com.fillin.domain.enums.SocialType;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.security.exception.AuthException;
 import io.jsonwebtoken.*;
@@ -72,9 +73,9 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String createAccessTokenByEmail(Member member, String email,LoginType loginType) {
+    public String createAccessTokenByEmail(Member member, String email,SocialType socialType) {
         try {
-            return generateTokenByEmail(member, email, accessTokenValidity, "access",loginType);
+            return generateTokenByEmail(member, email, accessTokenValidity, "access",socialType);
         } catch (JwtException e) {
             throw new AuthException(ErrorCode.JWT_GENERATION_FAILED);
         }
@@ -96,7 +97,7 @@ public class JwtTokenProvider {
                 .setSubject(email)
                 .claim("user_id", member.getId())
                 .claim("category", category)
-                .claim("loginType", loginType.name())
+                .claim("loginType", SocialType.name())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)

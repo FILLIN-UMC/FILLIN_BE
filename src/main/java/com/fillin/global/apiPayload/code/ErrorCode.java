@@ -17,7 +17,13 @@ public enum ErrorCode implements BaseCode {
 
     // USER Error
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"USER404","사용자를 찾을 수 없습니다."),
-    DUPLICATE_NICKNAME(HttpStatus.MULTI_STATUS,"USER4031","중복된 닉네임입니다.");
+    DUPLICATE_NICKNAME(HttpStatus.MULTI_STATUS,"USER4031","중복된 닉네임입니다."),
+
+    //jwt
+    JWT_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "JWT_500", "JWT 생성에 실패했습니다."),
+    JWT_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "JWT_401", "유효하지 않은 JWT 토큰입니다."),
+    JWT_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "JWT_401_EX", "만료된 JWT 토큰입니다."),
+    JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "JWT_401", "JWT 토큰을 찾을 수 없습니다.");
 
 
     private final HttpStatus status;

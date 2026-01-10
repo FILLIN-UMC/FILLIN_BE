@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
@@ -18,5 +19,16 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     int countByMemberIdAndCategory(Long memberId, ReportCategory category);
 
-    int countByMemberIdAndCategoryAndExpiresAt(Long memberId, ReportCategory category, LocalDateTime expiresAt);
+    int countByMemberIdAndCategoryAndExpiresAtBetween(
+            Long memberId,
+            ReportCategory category,
+            LocalDateTime start,
+            LocalDateTime end
+    );
+
+    List<Report> findByMemberIdAndExpiresAtBetween(
+            @Param("memberId") Long memberId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }

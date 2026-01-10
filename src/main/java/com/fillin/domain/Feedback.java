@@ -1,5 +1,6 @@
 package com.fillin.domain;
 
+import com.fillin.domain.enums.FeedbackType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,5 +24,5 @@ public class Feedback {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member; //피드백 작성자
 
-
+    private FeedbackType type;
 }

@@ -22,7 +22,7 @@ public class ReportExpireSoonDto {
 
     @Getter
     @Builder
-    private static class ReportExpireSoonListDto {
+    public static class ReportExpireSoonListDto {
         private Long reportId;
         private ReportCategory reportCategory;
         private String reportImageUrl;

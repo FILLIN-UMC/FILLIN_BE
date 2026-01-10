@@ -7,6 +7,8 @@ import com.fillin.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -55,6 +57,8 @@ public class Report extends BaseTimeEntity {
     private int likeCount;
 
     private LocalDateTime expiresAt; // 만료 시간
+
+    private String reportImageUrl;
 
     public void addLikeCount() {
         this.likeCount++;

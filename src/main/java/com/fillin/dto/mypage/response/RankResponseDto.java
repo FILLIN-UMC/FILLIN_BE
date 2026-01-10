@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RankResponseDto {
+    private Long memberId;
     private Achievement achievement;
     private Boangwan boangwan;
     private Haegyeolsa haegyeolsa;

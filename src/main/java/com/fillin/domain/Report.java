@@ -51,6 +51,7 @@ public class Report extends BaseTimeEntity {
     private int viewCount;
 
     @Column(columnDefinition = "integer default 0")
+    //도움이 됐어요 = like
     private int likeCount;
 
     private LocalDateTime expiresAt; // 만료 시간

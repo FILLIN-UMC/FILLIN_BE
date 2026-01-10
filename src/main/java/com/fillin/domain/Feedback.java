@@ -2,30 +2,26 @@ package com.fillin.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Bookmark {
+public class Feedback {
+
     @Id
-    @GeneratedValue
-    @Column(name = "bookmark_id")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "feedback_id")
+    private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_id", nullable = false)
-    private Report report;
+    private Report report; //피드백한 제보
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private Member member; //피드백 작성자
 
-    @Builder
-    public Bookmark(Report report, Member member) {
-        this.report = report;
-        this.member = member;
-    }
+
 }

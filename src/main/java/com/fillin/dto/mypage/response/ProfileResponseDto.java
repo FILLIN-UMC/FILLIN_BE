@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfileResponseDto {
+    private Long memberId;
     private String nickname;
     private String profileImageUrl;
     private List<String> ranks;

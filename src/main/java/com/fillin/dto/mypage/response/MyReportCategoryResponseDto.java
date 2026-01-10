@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportCountResponseDto {
+//DANGER, INCONVENIENCE, DISCOVERY
+public class MyReportCategoryResponseDto {
     private Long memberId;
-    private int totalReportCount;
-    private int totalViewCount;
+    private int dangerCount;
+    private int inconvenienceCount;
+    private int discoveryCount;
 }

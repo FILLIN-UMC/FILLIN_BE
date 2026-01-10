@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.response.Response;
 import com.fillin.global.security.exception.AuthException;
+import com.fillin.repository.member.MemberRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

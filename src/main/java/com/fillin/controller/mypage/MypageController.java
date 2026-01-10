@@ -2,6 +2,7 @@ package com.fillin.controller.mypage;
 
 import com.fillin.dto.mypage.request.ProfileRequestDto;
 import com.fillin.dto.mypage.response.ProfileResponseDto;
+import com.fillin.dto.mypage.response.RankResponseDto;
 import com.fillin.dto.mypage.response.ReportCountResponseDto;
 import com.fillin.global.apiPayload.response.Response;
 import com.fillin.service.mypage.MypageService;
@@ -51,6 +52,13 @@ public class MypageController {
     public Response<ReportCountResponseDto> getReportCount(@Param("memberId") Long memberId) {
         // Long memberId = member.getMember().getId();
         return mypageService.countReport(memberId);
+    }
+
+    @Operation(summary = "유저 랭크 조회", description = "유저의 랭크를 조회합니다.")
+    @GetMapping("/profile/ranks")
+    public Response<RankResponseDto> getRanks(@Param("memberId") Long memberId) {
+        // Long memberId = member.getMember().getId();
+        return mypageService.getRank(memberId);
     }
 
 

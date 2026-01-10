@@ -1,6 +1,10 @@
 package com.fillin.dto.mypage.response;
 
+import com.fillin.domain.enums.Achievement;
 import com.fillin.domain.enums.Rank;
+import com.fillin.domain.enums.rank.Boangwan;
+import com.fillin.domain.enums.rank.Haegyeolsa;
+import com.fillin.domain.enums.rank.Tamheomga;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,5 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RankResponseDto {
-    private List<Rank> ranks;
+    private Achievement achievement;
+    private Boangwan boangwan;
+    private Haegyeolsa haegyeolsa;
+    private Tamheomga tamheomga;
 }

@@ -47,7 +47,10 @@ public class MypageService {
                 .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
         RankResponseDto dto = RankResponseDto.builder()
-                .ranks(member.getRanks())
+                .achievement(member.getAchievement())
+                .boangwan(member.getBoangwan())
+                .tamheomga(member.getTamheomga())
+                .haegyeolsa(member.getHaegyoelsa())
                 .build();
 
         return Response.ok(ResultCode.OK,dto);

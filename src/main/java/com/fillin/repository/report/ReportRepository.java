@@ -31,4 +31,14 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
+
+    //만료된 제보들 (현재 시간보다 이전인 경우)
+    List<Report> findByMemberIdAndExpiresAtBefore(Long memberId, LocalDateTime now);
+
+    //만료되지 않은 제보들 (현재 시간보다 이후인 경우)
+    List<Report> findByMemberIdAndExpiresAtAfter(Long memberId, LocalDateTime now);
+
+    //특정 사용자가 좋아요한 제보들
+    @Query("SELECT l.report FROM Like l WHERE l.member.id = :memberId")
+    List<Report> findAllByMemberIdInLikes(@Param("memberId") Long memberId);
 }

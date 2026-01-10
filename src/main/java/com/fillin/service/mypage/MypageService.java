@@ -80,18 +80,4 @@ public class MypageService {
         else return Response.ok(ResultCode.OK,nickname + "은 사용가능한 닉네임입니다.");
     }
 
-    //총 제보 갯수 & 조회수
-    public Response<ReportCountResponseDto> countReport(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
-
-        ReportCountResponseDto dto = ReportCountResponseDto.builder()
-                .memberId(member.getId())
-                .totalReportCount(reportRepository.countByMemberId(memberId))
-                .totalViewCount(reportRepository.totalViewCountByMemberId(memberId))
-                .build();
-
-        return Response.ok(ResultCode.OK,dto);
-    }
-
 }

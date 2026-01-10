@@ -47,13 +47,6 @@ public class MypageController {
         return mypageService.checkDuplicateNickname(memberId, nickname);
     }
 
-    @Operation(summary = "제보 및 조회수 확인", description = "유저의 총 제보 갯수와 조회수를 확인합니다.")
-    @GetMapping("/reports/count")
-    public Response<ReportCountResponseDto> getReportCount(@Param("memberId") Long memberId) {
-        // Long memberId = member.getMember().getId();
-        return mypageService.countReport(memberId);
-    }
-
     @Operation(summary = "유저 랭크 조회", description = "유저의 랭크를 조회합니다.")
     @GetMapping("/profile/ranks")
     public Response<RankResponseDto> getRanks(@Param("memberId") Long memberId) {

@@ -5,6 +5,7 @@ import com.fillin.domain.Report;
 import com.fillin.domain.enums.FeedbackType;
 import com.fillin.domain.enums.ReportCategory;
 import com.fillin.dto.mypage.response.MyReportCategoryResponseDto;
+import com.fillin.dto.mypage.response.ReportCountResponseDto;
 import com.fillin.dto.mypage.response.ReportExpireSoonDetailDto;
 import com.fillin.dto.mypage.response.ReportExpireSoonDto;
 import com.fillin.global.apiPayload.code.ErrorCode;
@@ -34,6 +35,20 @@ public class MyReportService {
     private final ReportRepository reportRepository;
     private final LikeRepository bookmarkRepository;
     private final FeedbackRepository feedbackRepository;
+
+    //총 제보 갯수 & 조회수
+    public Response<ReportCountResponseDto> countReport(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
+
+        ReportCountResponseDto dto = ReportCountResponseDto.builder()
+                .memberId(member.getId())
+                .totalReportCount(reportRepository.countByMemberId(memberId))
+                .totalViewCount(reportRepository.totalViewCountByMemberId(memberId))
+                .build();
+
+        return Response.ok(ResultCode.OK,dto);
+    }
 
     //나의 제보 (카테고리별)
     public Response<MyReportCategoryResponseDto> getMyReportCategory(Long memberId) {

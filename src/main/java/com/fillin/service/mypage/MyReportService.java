@@ -4,10 +4,7 @@ import com.fillin.domain.Member;
 import com.fillin.domain.Report;
 import com.fillin.domain.enums.FeedbackType;
 import com.fillin.domain.enums.ReportCategory;
-import com.fillin.dto.mypage.response.MyReportCategoryResponseDto;
-import com.fillin.dto.mypage.response.ReportCountResponseDto;
-import com.fillin.dto.mypage.response.ReportExpireSoonDetailDto;
-import com.fillin.dto.mypage.response.ReportExpireSoonDto;
+import com.fillin.dto.mypage.response.*;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.code.ResultCode;
 import com.fillin.global.apiPayload.exception.GlobalException;
@@ -33,10 +30,11 @@ public class MyReportService {
 
     private final MemberRepository memberRepository;
     private final ReportRepository reportRepository;
-    private final LikeRepository bookmarkRepository;
+    private final LikeRepository likeRepository;
     private final FeedbackRepository feedbackRepository;
 
     //총 제보 갯수 & 조회수
+    @Transactional(readOnly = true)
     public Response<ReportCountResponseDto> countReport(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
@@ -51,6 +49,7 @@ public class MyReportService {
     }
 
     //나의 제보 (카테고리별)
+    @Transactional(readOnly = true)
     public Response<MyReportCategoryResponseDto> getMyReportCategory(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
@@ -106,6 +105,7 @@ public class MyReportService {
     }
 
     //사라질 제보 (상세)
+    @Transactional(readOnly = true)
     public Response<List<ReportExpireSoonDetailDto>> getReportExpireSoonDetail(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
@@ -145,11 +145,95 @@ public class MyReportService {
     }
 
     //나의 제보 (유지)
+    @Transactional(readOnly = true)
+    public Response<List<MyReportListResponseDto>> getMyReportList(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+
+        List<Report> reports = reportRepository.findByMemberIdAndExpiresAtAfter(memberId, LocalDateTime.now());
+
+        List<MyReportListResponseDto> dtos = reports.stream()
+                .map(
+                        report -> {
+                            return MyReportListResponseDto.builder()
+                                    .memberId(member.getId())
+                                    .reportId(report.getId())
+                                    .reportCategory(report.getCategory())
+                                    .reportImageUrl(report.getReportImageUrl())
+                                    .address(report.getAddress())
+                                    .title(report.getTitle())
+                                    .latitude(report.getLatitude())
+                                    .longitude(report.getLongitude())
+                                    .viewCount(report.getViewCount())
+                                    .build();
+                        }
+                ).toList();
+
+        return Response.ok(ResultCode.OK,dtos);
+    }
 
     //니의 제보 (만료)
+    @Transactional(readOnly = true)
+    public Response<List<MyReportListResponseDto>> getMyReportListExpired(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+
+        List<Report> reports = reportRepository.findByMemberIdAndExpiresAtBefore(memberId, LocalDateTime.now());
+
+        List<MyReportListResponseDto> dtos = reports.stream()
+                .map(
+                        report -> {
+                            return MyReportListResponseDto.builder()
+                                    .memberId(member.getId())
+                                    .reportId(report.getId())
+                                    .reportCategory(report.getCategory())
+                                    .reportImageUrl(report.getReportImageUrl())
+                                    .address(report.getAddress())
+                                    .title(report.getTitle())
+                                    .latitude(report.getLatitude())
+                                    .longitude(report.getLongitude())
+                                    .viewCount(report.getViewCount())
+                                    .build();
+                        }
+                ).toList();
+
+        return Response.ok(ResultCode.OK,dtos);
+    }
 
     //나의 제보 삭제
+    public Response<String> deleteMyReport(Long memberId, Long reportId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        Report report = reportRepository.findById(reportId).orElseThrow(() -> new GlobalException(ErrorCode.REPORT_NOT_FOUND));
+
+        reportRepository.delete(report);
+
+        return Response.ok(ResultCode.OK,"report id = " + reportId + " deleted.");
+    }
+
 
     //저장한 제보
+    @Transactional(readOnly = true)
+    public Response<List<MyReportListResponseDto>> getMyLikeReports(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+
+        List<Report> reports = reportRepository.findAllByMemberIdInLikes(memberId);
+
+        List<MyReportListResponseDto> dtos = reports.stream()
+                .map(
+                        report -> {
+                            return MyReportListResponseDto.builder()
+                                    .memberId(member.getId())
+                                    .reportId(report.getId())
+                                    .reportCategory(report.getCategory())
+                                    .reportImageUrl(report.getReportImageUrl())
+                                    .address(report.getAddress())
+                                    .title(report.getTitle())
+                                    .latitude(report.getLatitude())
+                                    .longitude(report.getLongitude())
+                                    .viewCount(report.getViewCount())
+                                    .build();
+                        }
+                ).toList();
+
+        return Response.ok(ResultCode.OK,dtos);
+    }
 
 }

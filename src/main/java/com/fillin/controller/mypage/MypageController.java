@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/mypage")
-@Tag(name = "Mainpage API", description = "메인페이지 관련 API - by 황신애")
+@Tag(name = "Mypage API", description = "마이페이지 관련 API - by 황신애")
 public class MypageController {
 
     private final MypageService mypageService;

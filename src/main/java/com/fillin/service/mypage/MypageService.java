@@ -1,7 +1,6 @@
 package com.fillin.service.mypage;
 
 import com.fillin.domain.Member;
-import com.fillin.domain.Report;
 import com.fillin.dto.mypage.request.ProfileRequestDto;
 import com.fillin.dto.mypage.response.ProfileResponseDto;
 import com.fillin.dto.mypage.response.RankResponseDto;
@@ -10,23 +9,19 @@ import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.code.ResultCode;
 import com.fillin.global.apiPayload.exception.GlobalException;
 import com.fillin.global.apiPayload.response.Response;
-import com.fillin.repository.bookmark.BookmarkRepository;
 import com.fillin.repository.member.MemberRepository;
 import com.fillin.repository.report.ReportRepository;
-import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MypageService {
 
     private final MemberRepository memberRepository;
     private final ReportRepository reportRepository;
-    private final BookmarkRepository bookmarkRepository;
 
     //프로필 조회
     public Response<ProfileResponseDto> getProfile(Long memberId) {
@@ -34,6 +29,7 @@ public class MypageService {
                 .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
         ProfileResponseDto dto = ProfileResponseDto.builder()
+                .memberId(member.getId())
                 .nickname(member.getNickname())
                 .profileImageUrl(member.getProfileImageUrl())
                 .build();
@@ -47,6 +43,7 @@ public class MypageService {
                 .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
         RankResponseDto dto = RankResponseDto.builder()
+                .memberId(member.getId())
                 .achievement(member.getAchievement())
                 .boangwan(member.getBoangwan())
                 .tamheomga(member.getTamheomga())
@@ -64,6 +61,7 @@ public class MypageService {
         member.updateProfileInfo(profileRequestDto);
 
         ProfileResponseDto dto = ProfileResponseDto.builder()
+                .memberId(member.getId())
                 .nickname(member.getNickname())
                 .profileImageUrl(member.getProfileImageUrl())
                 .build();
@@ -88,6 +86,7 @@ public class MypageService {
                 .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
         ReportCountResponseDto dto = ReportCountResponseDto.builder()
+                .memberId(member.getId())
                 .totalReportCount(reportRepository.countByMemberId(memberId))
                 .totalViewCount(reportRepository.totalViewCountByMemberId(memberId))
                 .build();

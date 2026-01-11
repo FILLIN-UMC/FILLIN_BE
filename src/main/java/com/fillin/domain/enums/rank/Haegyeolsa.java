@@ -1,7 +1,9 @@
 package com.fillin.domain.enums.rank;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 
+@Getter
 public enum Haegyeolsa {
     HAEGYEOLSA_0("해결사 0",0),
     HAEGYEOLSA_1("해결사 1",5),
@@ -17,5 +19,15 @@ public enum Haegyeolsa {
     Haegyeolsa(String displayName, int minReport) {
         this.displayName = displayName;
         this.minReport = minReport;
+    }
+
+    public static Haegyeolsa resolveHaegyeolsaRank(int count) {
+        for (int i = Haegyeolsa.values().length - 1; i >= 0; i--) {
+            Haegyeolsa rank = Haegyeolsa.values()[i];
+            if (count >= rank.getMinReport()) { // Boangwan에 getter 필요
+                return rank;
+            }
+        }
+        return Haegyeolsa.HAEGYEOLSA_0;
     }
 }

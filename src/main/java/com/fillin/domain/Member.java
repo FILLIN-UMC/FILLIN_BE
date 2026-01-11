@@ -70,8 +70,21 @@ public class Member extends BaseTimeEntity {
         this.status = status;
     }
 
-    @Builder
+    public void updateAchievement(Achievement achievement) {
+        this.achievement = achievement;
+    }
 
+    public void updateBoangwan(Boangwan newRank) {
+        this.boangwan = newRank;
+    }
+
+    public void updateHaegyeolsa(Haegyeolsa newRank) {
+        this.haegyoelsa = newRank;
+    }
+
+    public void updateTamheomga(Tamheomga newRank) {
+        this.tamheomga = newRank;
+    }
 
     public void updateProfileInfo(ProfileRequestDto dto) {
         // 닉네임이 요청에 포함된 경우에만 업데이트

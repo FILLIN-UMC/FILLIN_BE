@@ -30,6 +30,7 @@ public class ReportImageDetailController {
         return reportImageDetailService.createFeedback(memberId, reportId, type);
     }
 
+    @Operation(summary = "좋아요 토글", description = "제보에 대한 좋아요(저장) 토글입니다. 본인의 제보에 좋아요를 누를 수 없습니다.")
     @PostMapping("/{reportId}/like")
     public Response<LikeResponseDto> likeToggle(@PathVariable Long reportId, Long memberId){
         return reportImageDetailService.toggleLike(memberId, reportId);

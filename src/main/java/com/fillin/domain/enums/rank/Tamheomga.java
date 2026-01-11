@@ -1,7 +1,9 @@
 package com.fillin.domain.enums.rank;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 
+@Getter
 public enum Tamheomga {
     TAMHEOMGA_0("탐험가 0",0),
     TAMHEOMGA_1("탐험가 1",5),
@@ -17,5 +19,15 @@ public enum Tamheomga {
     Tamheomga(String displayName, int minReport) {
         this.displayName = displayName;
         this.minReport = minReport;
+    }
+
+    public static Tamheomga resolveTamheomgaRank(int count) {
+        for (int i = Tamheomga.values().length - 1; i >= 0; i--) {
+            Tamheomga rank = Tamheomga.values()[i];
+            if (count >= rank.getMinReport()) {
+                return rank;
+            }
+        }
+        return Tamheomga.TAMHEOMGA_0;
     }
 }

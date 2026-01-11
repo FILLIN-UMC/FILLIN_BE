@@ -24,8 +24,17 @@ public class MemberMission { // 유저별 미션 진행도
     @JoinColumn(name = "mission_id")
     private Mission mission;
 
-    private int progressCount; // 현재 달성 횟수 (progress_int -> progressCount 명명 수정 권장)
+    private int progressCount;
 
     private Boolean isComplete;
     private LocalDateTime completedAt;
+
+    public void addProgress() {
+        this.progressCount++;
+    }
+
+    public void complete() {
+        this.isComplete = true;
+        this.completedAt = LocalDateTime.now();
+    }
 }

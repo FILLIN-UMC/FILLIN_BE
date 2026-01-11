@@ -30,4 +30,11 @@ public enum Haegyeolsa {
         }
         return Haegyeolsa.HAEGYEOLSA_0;
     }
+
+    public static int getNextTarget(int currentCount) {
+        for (Haegyeolsa rank : values()) {
+            if (rank.minReport > currentCount) return rank.minReport;
+        }
+        return HAEGYEOLSA_5.minReport; // 만렙 시 마지막 기준 유지
+    }
 }

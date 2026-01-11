@@ -31,4 +31,11 @@ public enum Boangwan {
         }
         return BOANGWAN_0; // 기본값
     }
+
+    public static int getNextTarget(int currentCount) {
+        for (Boangwan rank : values()) {
+            if (rank.minReport > currentCount) return rank.minReport;
+        }
+        return BOANGWAN_5.minReport; // 만렙 시 마지막 기준 유지
+    }
 }

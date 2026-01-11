@@ -30,4 +30,11 @@ public enum Tamheomga {
         }
         return Tamheomga.TAMHEOMGA_0;
     }
+
+    public static int getNextTarget(int currentCount) {
+        for (Tamheomga rank : values()) {
+            if (rank.minReport > currentCount) return rank.minReport;
+        }
+        return TAMHEOMGA_5.minReport; // 만렙 시 마지막 기준 유지
+    }
 }

@@ -20,8 +20,10 @@ public enum ErrorCode implements BaseCode {
     DUPLICATE_NICKNAME(HttpStatus.MULTI_STATUS,"USER4031","중복된 닉네임입니다."),
 
     // Report Error
-    REPORT_NOT_FOUND(HttpStatus.NOT_FOUND,"REPORT404","제보를 찾을 수 없습니다.");
+    REPORT_NOT_FOUND(HttpStatus.NOT_FOUND,"REPORT404","제보를 찾을 수 없습니다."),
 
+    // NotiSet Error
+    NOTISET_NOT_FOUND(HttpStatus.NOT_FOUND,"NOTISET404","알림설정을 찾을 수 없습니다.");
 
 
     private final HttpStatus status;

@@ -22,6 +22,9 @@ public enum ErrorCode implements BaseCode {
     // Report Error
     REPORT_NOT_FOUND(HttpStatus.NOT_FOUND,"REPORT404","제보를 찾을 수 없습니다."),
 
+    // Like Error
+    LIKE_FORBIDDEN(HttpStatus.FORBIDDEN,"LIKE403","자신의 제보에는 좋아요를 누를 수 없습니다."),
+
     // NotiSet Error
     NOTISET_NOT_FOUND(HttpStatus.NOT_FOUND,"NOTISET404","알림설정을 찾을 수 없습니다.");
 

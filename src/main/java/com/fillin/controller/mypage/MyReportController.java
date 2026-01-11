@@ -32,36 +32,42 @@ public class MyReportController {
         return myReportService.getMyReportCategory(memberId);
     }
 
+    @Operation(summary = "만료 예정 제보(간단)", description = "5일내로 만료 예정인 제보들")
     @GetMapping("/soon")
     public Response<ReportExpireSoonDto> getReportExpireSoon(@Param("memberId") Long memberId) {
         // Long memberId = member.getMember().getId();
         return myReportService.getExpireSoon(memberId);
     }
 
+    @Operation(summary = "만료 예정 제보(상세)", description = "5일내로 만료 예정인 제보들을 상세하게 조회합니다.")
     @GetMapping("/soon/detail")
     public Response<List<ReportExpireSoonDetailDto>> getReportExpireSoonDetail(@Param("memberId") Long memberId) {
         // Long memberId = member.getMember().getId();
         return myReportService.getReportExpireSoonDetail(memberId);
     }
 
+    @Operation(summary = "나의 제보", description = "유저가 한 제보 리스트 중 만료되지 않은 제보를 조회합니다.")
     @GetMapping
     public Response<List<MyReportListResponseDto>> getMyReportList(@Param("memberId") Long memberId) {
         // Long memberId = member.getMember().getId();
         return myReportService.getMyReportList(memberId);
     }
 
+    @Operation(summary = "나의 제보 (만료) ", description = "유저의 제보 중 만료된 제보를 조회합니다.")
     @GetMapping("/expired")
     public Response<List<MyReportListResponseDto>> getMyReportExpired(@Param("memberId") Long memberId) {
         // Long memberId = member.getMember().getId();
         return myReportService.getMyReportListExpired(memberId);
     }
 
+    @Operation(summary = "제보 삭제", description = "유저의 제보를 삭제합니다.")
     @DeleteMapping("{reportId}")
     public Response<String> deleteReport(Long memberId ,@PathVariable Long reportId) {
         // Long memberId = member.getMember().getId();
         return myReportService.deleteMyReport(memberId,reportId);
     }
 
+    @Operation(summary = "저장한 제보", description = "유저가 저장한 제보를 조회합니다.")
     @GetMapping("/like")
     public Response<List<MyReportListResponseDto>> getMyReportLike(@Param("memberId") Long memberId) {
         // Long memberId = member.getMember().getId();

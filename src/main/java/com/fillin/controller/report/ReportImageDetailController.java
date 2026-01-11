@@ -1,6 +1,7 @@
 package com.fillin.controller.report;
 
 import com.fillin.domain.enums.FeedbackType;
+import com.fillin.dto.report.response.LikeResponseDto;
 import com.fillin.dto.report.response.ReportImageDetailResponseDto;
 import com.fillin.global.apiPayload.response.Response;
 import com.fillin.service.report.ReportImageDetailService;
@@ -27,5 +28,10 @@ public class ReportImageDetailController {
     @PostMapping("/{reportId}/feedback")
     public Response<String> createFeedback(@PathVariable Long reportId, Long memberId, FeedbackType type){
         return reportImageDetailService.createFeedback(memberId, reportId, type);
+    }
+
+    @PostMapping("/{reportId}/like")
+    public Response<LikeResponseDto> likeToggle(@PathVariable Long reportId, Long memberId){
+        return reportImageDetailService.toggleLike(memberId, reportId);
     }
 }

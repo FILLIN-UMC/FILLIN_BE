@@ -4,6 +4,7 @@ import com.fillin.domain.common.BaseTimeEntity;
 import com.fillin.domain.enums.ReportCategory;
 import com.fillin.domain.enums.ReportStatus;
 import com.fillin.domain.Member;
+import com.fillin.domain.enums.ValidType;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -49,6 +50,9 @@ public class Report extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ReportStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private ValidType validType;
+
     @Column(columnDefinition = "integer default 0")
     private int viewCount;
 
@@ -69,4 +73,6 @@ public class Report extends BaseTimeEntity {
             this.likeCount--;
         }
     }
+
+    public void addViewCount() {this.viewCount++;}
 }

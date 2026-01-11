@@ -127,6 +127,7 @@ public class MyReportService {
                             .profileImageUrl(member.getProfileImageUrl())
                             .reportId(report.getId())
                             .reportCategory(report.getCategory())
+                            .validType(report.getValidType())
                             .reportImageUrl(report.getReportImageUrl())
                             .expireTime(report.getExpiresAt())
                             .title(report.getTitle())

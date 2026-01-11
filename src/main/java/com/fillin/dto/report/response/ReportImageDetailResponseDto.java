@@ -1,4 +1,4 @@
-package com.fillin.dto.mypage.response;
+package com.fillin.dto.report.response;
 
 import com.fillin.domain.enums.Achievement;
 import com.fillin.domain.enums.ReportCategory;
@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportExpireSoonDetailDto {
-    private Long memberId;
+public class ReportImageDetailResponseDto {
+    private Long writerId;
     private Achievement achievement;
     private String profileImageUrl;
     private Long reportId;

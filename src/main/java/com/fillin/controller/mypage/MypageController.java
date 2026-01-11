@@ -4,6 +4,8 @@ import com.fillin.dto.mypage.request.ProfileRequestDto;
 import com.fillin.dto.mypage.response.ProfileResponseDto;
 import com.fillin.dto.mypage.response.RankResponseDto;
 import com.fillin.dto.mypage.response.ReportCountResponseDto;
+import com.fillin.dto.notiSet.request.NotificationUpdateRequestDto;
+import com.fillin.dto.notiSet.response.NotificationUpdateResponseDto;
 import com.fillin.global.apiPayload.response.Response;
 import com.fillin.service.mypage.MypageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,5 +56,18 @@ public class MypageController {
         return mypageService.getRank(memberId);
     }
 
+    @Operation(summary = "유저 알림 설정 변경", description = "알림의 수신 여부를 변경합니다")
+    @PostMapping("/profile/notiSet")
+    public Response<NotificationUpdateResponseDto> updateNotiSet(Long memberId, NotificationUpdateRequestDto dto){
+        // Long memberId = member.getMember().getId();
+        return mypageService.updateNotiSet(memberId,dto);
+    }
+
+    @Operation(summary = "유저 알림 설정 조회", description = "알림의 수신 여부를 조회합니다")
+    @GetMapping("/profile/notiSet")
+    public Response<NotificationUpdateResponseDto> getNotiSet(Long memberId){
+        // Long memberId = member.getMember().getId();
+        return mypageService.getNotiSet(memberId);
+    }
 
 }

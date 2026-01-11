@@ -1,14 +1,18 @@
 package com.fillin.service.mypage;
 
 import com.fillin.domain.Member;
+import com.fillin.domain.NotificationSetting;
 import com.fillin.dto.mypage.request.ProfileRequestDto;
 import com.fillin.dto.mypage.response.ProfileResponseDto;
 import com.fillin.dto.mypage.response.RankResponseDto;
 import com.fillin.dto.mypage.response.ReportCountResponseDto;
+import com.fillin.dto.notiSet.request.NotificationUpdateRequestDto;
+import com.fillin.dto.notiSet.response.NotificationUpdateResponseDto;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.code.ResultCode;
 import com.fillin.global.apiPayload.exception.GlobalException;
 import com.fillin.global.apiPayload.response.Response;
+import com.fillin.repository.NotiSetRepository;
 import com.fillin.repository.member.MemberRepository;
 import com.fillin.repository.report.ReportRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MypageService {
 
     private final MemberRepository memberRepository;
-    private final ReportRepository reportRepository;
+    private final NotiSetRepository notiSetRepository;
 
     //프로필 조회
     public Response<ProfileResponseDto> getProfile(Long memberId) {
@@ -78,6 +82,48 @@ public class MypageService {
             return Response.fail(ErrorCode.DUPLICATE_NICKNAME);
         }
         else return Response.ok(ResultCode.OK,nickname + "은 사용가능한 닉네임입니다.");
+    }
+
+    //알림 설정
+    public Response<NotificationUpdateResponseDto> updateNotiSet(Long memberId, NotificationUpdateRequestDto dto){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
+
+        NotificationSetting notiSet = notiSetRepository.findByMember(member);
+        if(notiSet == null) {
+            return Response.fail(ErrorCode.NOTISET_NOT_FOUND);
+        }
+
+        notiSet.updateAlarmSetting(dto);
+
+        NotificationUpdateResponseDto responseDto = NotificationUpdateResponseDto.builder()
+                .memberId(member.getId())
+                .feedbackAlarm(notiSet.getIsFeedbackAlarm())
+                .reportAlarm(notiSet.getIsReportAlarm())
+                .serviceAlarm(notiSet.getIsServiceAlarm())
+                .build();
+
+        return Response.ok(ResultCode.OK,responseDto);
+    }
+
+    public Response<NotificationUpdateResponseDto> getNotiSet(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        NotificationSetting notiSet = notiSetRepository.findByMember(member);
+
+        if(notiSet == null) {
+            return Response.fail(ErrorCode.NOTISET_NOT_FOUND);
+        }
+
+        NotificationUpdateResponseDto responseDto = NotificationUpdateResponseDto.builder()
+                .memberId(member.getId())
+                .feedbackAlarm(notiSet.getIsFeedbackAlarm())
+                .reportAlarm(notiSet.getIsReportAlarm())
+                .serviceAlarm(notiSet.getIsServiceAlarm())
+                .build();
+
+        return Response.ok(ResultCode.OK,responseDto);
+
     }
 
 }

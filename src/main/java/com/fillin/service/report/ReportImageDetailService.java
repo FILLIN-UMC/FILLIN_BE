@@ -1,17 +1,20 @@
 package com.fillin.service.report;
 
 import com.fillin.domain.Feedback;
+import com.fillin.domain.Like;
 import com.fillin.domain.Member;
 import com.fillin.domain.Report;
 import com.fillin.domain.enums.FeedbackType;
 import com.fillin.dto.mypage.response.ReportExpireSoonDetailDto;
 import com.fillin.dto.report.request.FeedbackRequestDto;
+import com.fillin.dto.report.response.LikeResponseDto;
 import com.fillin.dto.report.response.ReportImageDetailResponseDto;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.code.ResultCode;
 import com.fillin.global.apiPayload.exception.GlobalException;
 import com.fillin.global.apiPayload.response.Response;
 import com.fillin.repository.feedback.FeedbackRepository;
+import com.fillin.repository.like.LikeRepository;
 import com.fillin.repository.member.MemberRepository;
 import com.fillin.repository.report.ReportRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ public class ReportImageDetailService {
     private final ReportRepository reportRepository;
     private final FeedbackRepository feedbackRepository;
     private final MemberRepository memberRepository;
+    private final LikeRepository likeRepository;
 
     //상세 조회
     @Transactional(readOnly = true)
@@ -80,6 +84,40 @@ public class ReportImageDetailService {
         }
 
         return Response.ok(ResultCode.OK,"사용자가 제보 id = "+ report.getId() + "에 " + type + "을 남겼습니다." );
+    }
+
+    //좋아요 토글
+    public Response<LikeResponseDto> toggleLike(Long memberId, Long reportId){
+        Member member = memberRepository.findById(memberId).orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
+        Report report = reportRepository.findById(reportId).orElseThrow(() -> new GlobalException(ErrorCode.REPORT_NOT_FOUND));
+
+        if(report.getMember().getId().equals(member.getId())){
+            return Response.fail(ErrorCode.LIKE_FORBIDDEN);
+        }
+
+        Like like = likeRepository.findByMemberIdAndReportId(memberId, reportId);
+
+        if(like == null){
+            Like newLike = Like.builder()
+                    .member(member)
+                    .report(report)
+                    .build();
+
+            likeRepository.save(newLike);
+            report.addLikeCount();
+        }
+        else{
+            likeRepository.delete(like);
+            report.removeLikeCount();
+        }
+
+        LikeResponseDto dto = LikeResponseDto.builder()
+                .memberId(member.getId())
+                .reportId(report.getId())
+                .likeCount(report.getLikeCount())
+                .build();
+
+        return Response.ok(ResultCode.OK,dto);
     }
 
 }

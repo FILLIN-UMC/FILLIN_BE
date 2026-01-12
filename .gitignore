@@ -36,5 +36,6 @@ replay_pid*
 .gradle/
 ./bin
 
+build/
 /build/
 local.properties

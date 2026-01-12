@@ -32,9 +32,14 @@ replay_pid*
 *.iml
 .DS_Store
 
-
 .gradle/
 ./bin
 
 build/
 local.properties
+
+# Gradle 임시 파일 및 결과물
+bin/
+out/
+*.bin
+Thumbs.db

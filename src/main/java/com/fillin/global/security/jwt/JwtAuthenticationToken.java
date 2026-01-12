@@ -10,7 +10,7 @@ import java.util.Collection;
  */
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final Long user_id;
+    private final Long member_id;
     private final String token;
 
 
@@ -18,13 +18,13 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     public JwtAuthenticationToken(Long user_id, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.token = null; //인증전에는 토큰을 들고 있지 않는다.
-        this.user_id = user_id;
+        this.member_id = user_id;
         super.setAuthenticated(true);
     }
 
     @Override
     public Object getPrincipal() {
-        return user_id;
+        return member_id;
     }
 
     @Override

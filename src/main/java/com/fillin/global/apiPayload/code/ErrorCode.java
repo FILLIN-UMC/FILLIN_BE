@@ -15,15 +15,31 @@ public enum ErrorCode implements BaseCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON404", "찾을 수 없는 요청입니다."),
 
-    // USER Error
+    // member Error
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"USER404","사용자를 찾을 수 없습니다."),
     DUPLICATE_NICKNAME(HttpStatus.MULTI_STATUS,"USER4031","중복된 닉네임입니다."),
+    USER_NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "USER_401", "로그인 하지 않았습니다."),
+    USER_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "USER_403", "권한이 없습니다."),
+    NICKNAME_ALREADY_EXISTS(HttpStatus.ALREADY_REPORTED, "USER_400", "해당 닉네임이 존재합니다."),
 
-    //jwt
+    //jwt + Login
     JWT_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "JWT_500", "JWT 생성에 실패했습니다."),
     JWT_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "JWT_401", "유효하지 않은 JWT 토큰입니다."),
     JWT_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "JWT_401_EX", "만료된 JWT 토큰입니다."),
-    JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "JWT_401", "JWT 토큰을 찾을 수 없습니다.");
+    JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "JWT_401", "JWT 토큰을 찾을 수 없습니다."),
+    UNSUPPORTED_SOCIAL_TYPE(HttpStatus.NOT_FOUND,"LOGIN400","지원하지 않는 소셜타입입니다."),
+
+    // Agreement
+    AGREEMENT_NOT_FOUND(HttpStatus.NOT_FOUND,"AGREEMENT404","해당 약관이 존재하지 않습니다."),
+
+    // KaKao
+    KAKAO_JSON_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "KAKAO_500_JSON", "카카오 프로필 파싱 중 오류가 발생했습니다."),
+    KAKAO_API_ERROR(HttpStatus.BAD_GATEWAY, "KAKAO_502_API", "카카오 서버와의 통신 중 오류가 발생했습니다."),
+    KAKAO_INVALID_GRANT(HttpStatus.UNAUTHORIZED, "KAKAO_401_INVALID_GRANT", "유효하지 않거나 만료된 인가 코드입니다."),
+    KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_401_AUTH_FAILED", "카카오 인증에 실패했습니다."),
+    ALREADY_REGISTERED_WITH_OTHER_LOGIN(HttpStatus.CONFLICT, "AUTH_409_ALREADY_REGISTERED", "해당 이메일은 다른 로그인 방식으로 이미 가입되어 있습니다."),
+    SOCIAL_LOGIN_INVALID_STATE(HttpStatus.UNAUTHORIZED, "SOCIAL_401_INVALID_GRANT", "유효하지 않거나 만료된 STATE 값입니다..");
+
 
 
     private final HttpStatus status;

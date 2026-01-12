@@ -49,6 +49,10 @@ jwt:
   access-token-validity: ${JWT_ACCESS_EXPIRE}    # 1시간
   refresh-token-validity: ${JWT_REFRESH_EXPIRE}  # 2주
 
+kakao:
+  client-id: ${KAKAO_REST_API_KEY}
+  redirect-uri: http://localhost:8080/api/auth/kakao/callback    # 인가 코드
+
 
 springdoc:
   api-docs:

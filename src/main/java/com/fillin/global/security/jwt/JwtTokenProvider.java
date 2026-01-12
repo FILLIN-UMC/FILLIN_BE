@@ -35,6 +35,14 @@ public class JwtTokenProvider {
     private JwtParser jwtParser;
     private Key secretKey;
 
+    //온보딩 전 회원을 위한 임시 토큰
+    @Value("${jwt.onboarding-token-validity:900000}") // 15분 기본
+    private long onboardingTokenValidity;
+
+    public String createOnboardingToken(Long memberId, SocialType socialType) {
+        return generateToken(memberId, null, socialType, onboardingTokenValidity, "onboarding");
+    }
+
     @PostConstruct
     public void init() {
         this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
@@ -43,74 +51,48 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    public String createAccessToken(Member member, String phoneNumber) {
+    public String createAccessToken(Member member, String email,SocialType socialType) {
         try {
-            return generateToken(member, phoneNumber, accessTokenValidity,"access");
+            return generateToken(member.getId(), email, socialType, accessTokenValidity,"access");
         } catch (JwtException e) {
             throw new AuthException(ErrorCode.JWT_GENERATION_FAILED);
         }
     }
 
-    public String createRefreshToken(Member member, String phoneNumber) {
+    public String createRefreshToken(Member member, String email,SocialType socialType) {
         try {
-            return generateToken(member, phoneNumber, refreshTokenValidity, "refresh");
+            return generateToken(member.getId(), email, socialType, refreshTokenValidity, "refresh");
         } catch (JwtException e) {
             throw new AuthException(ErrorCode.JWT_GENERATION_FAILED);
         }
     }
 
-    private String generateToken(Member member, String phoneNumber, long validity, String category) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + validity);
-
-        return Jwts.builder()
-                .setSubject(phoneNumber)
-                .claim("member_id", member.getId())
-                .claim("category", category)      // "access" 또는 "refresh"
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
-                .compact();
-    }
-
-    public String createAccessTokenByEmail(Member member, String email,SocialType socialType) {
+    private String generateToken(Long memberId, String email, SocialType socialType,
+                                 long validity, String category) {
         try {
-            return generateTokenByEmail(member, email, accessTokenValidity, "access",socialType);
+            Date now = new Date();
+            Date expiryDate = new Date(now.getTime() + validity);
+
+            return Jwts.builder()
+                    .setSubject(email)
+                    .claim("memberId", memberId)
+                    .claim("category", category)      // access / refresh
+                    .claim("socialType", socialType.name())
+                    .setIssuedAt(now)
+                    .setExpiration(expiryDate)
+                    .signWith(secretKey, SignatureAlgorithm.HS512)
+                    .compact();
         } catch (JwtException e) {
             throw new AuthException(ErrorCode.JWT_GENERATION_FAILED);
         }
     }
 
-    public String createRefreshTokenByEmail(Member member, String email, LoginType loginType) {
-        try {
-            return generateTokenByEmail(member, email, refreshTokenValidity, "refresh",loginType);
-        } catch (JwtException e) {
-            throw new AuthException(ErrorCode.JWT_GENERATION_FAILED);
-        }
-    }
 
-    private String generateTokenByEmail(Member member, String email, long validity, String category, LoginType loginType) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + validity);
-
-        return Jwts.builder()
-                .setSubject(email)
-                .claim("user_id", member.getId())
-                .claim("category", category)
-                .claim("loginType", SocialType.name())
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
-                .compact();
-    }
 
     public boolean validateToken(String token) {
-        if (token == null || token.trim().isEmpty()) {
-            return false;
-        }
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7).trim();
-        }
+        String raw = resolve(token);
+        if (raw == null) return false;
+
         try {
             jwtParser.parseClaimsJws(token);
             return true;
@@ -120,13 +102,10 @@ public class JwtTokenProvider {
     }
 
     // JWT 의 payload(Claims 객체) 추출
-    public Claims parseClaims(String token) {
-        return jwtParser.parseClaimsJws(token).getBody();
-    }
-
     public Claims getClaimsFromToken(String token) {
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7).trim();
+        String raw = resolve(token);
+        if (raw == null){
+            throw new AuthException(ErrorCode.JWT_TOKEN_NOT_FOUND);
         }
 
         try {
@@ -138,25 +117,29 @@ public class JwtTokenProvider {
         }
     }
 
-    // JWT 발급 시 필요한 시크릿 키를 Key 객체로 변환 (서명 검증)
-    private Key getSigningKey() {
-        return this.secretKey;
-    }
 
     public Long getMemberIdFromToken(String token) {
-        if (token == null || token.trim().isEmpty()) {
-            throw new AuthException(ErrorCode.JWT_TOKEN_NOT_FOUND);
-        }
-
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7).trim();
-        }
-        try {
-            return jwtParser.parseClaimsJws(token).getBody().get("user_id", Long.class);
-        } catch (ExpiredJwtException e) {
-            throw new AuthException(ErrorCode.JWT_EXPIRED_TOKEN);
-        } catch (JwtException e) {
-            throw new AuthException(ErrorCode.JWT_INVALID_TOKEN);
-        }
+        Claims claims = getClaimsFromToken(token);
+        Long memberId = claims.get("memberId", Long.class);
+        if (memberId == null) throw new AuthException(ErrorCode.JWT_INVALID_TOKEN);
+        return memberId;
     }
+
+    public String getCategory(String token) {
+        return getClaimsFromToken(token).get("category", String.class);
+    }
+
+    public SocialType getSocialType(String token) {
+        String v = getClaimsFromToken(token).get("socialType", String.class);
+        return v == null ? null : SocialType.valueOf(v);
+    }
+
+    private String resolve(String token) {
+        if (token == null || token.trim().isEmpty()) return null;
+        token = token.trim();
+        if (token.startsWith("Bearer ")) return token.substring(7).trim();
+        return token;
+    }
+
+
 }

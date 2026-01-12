@@ -36,6 +36,18 @@ spring:
       hibernate:
         format_sql: true
 
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      region:
+        static: ${AWS_REGION} # 예: ap-northeast-2
+      s3:
+        bucket: ${S3_BUCKET_NAME}
+      stack:
+        auto: false
+
 
 server:
   tomcat:

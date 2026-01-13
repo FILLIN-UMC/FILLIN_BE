@@ -136,7 +136,7 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TokenResponse reissue(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new AuthException(ErrorCode.JWT_INVALID_TOKEN);
@@ -171,15 +171,16 @@ public class OAuthServiceImpl implements OAuthService {
 
     private void saveAgreements(Member member, List<Long> agreedAgreementIds) {
 
-        for (Long agreementId : agreedAgreementIds) {
-            Agreement agreement = agreementRepository.findById(agreementId)
-                    .orElseThrow(() -> new AuthException(ErrorCode.AGREEMENT_NOT_FOUND));
+        List<Agreement> agreements = agreementRepository.findAllById(agreedAgreementIds);
 
-            // 이미 저장돼 있으면 스킵(또는 업데이트)
-            if (memberAgreementRepository.existsByMemberIdAndAgreementId(member.getId(), agreementId)) {
+        if (agreements.size() != agreedAgreementIds.size()) {
+            throw new AuthException(ErrorCode.AGREEMENT_NOT_FOUND);
+        }
+
+        for (Agreement agreement : agreements) {
+            if (memberAgreementRepository.existsByMemberIdAndAgreementId(member.getId(), agreement.getId())) {
                 continue;
             }
-
             memberAgreementRepository.save(MemberAgreement.agree(member, agreement));
         }
     }

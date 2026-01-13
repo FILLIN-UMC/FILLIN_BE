@@ -18,6 +18,9 @@ public class Agreement { // 약관 마스터 테이블
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private Boolean isRequired;
+    //약관 필수인지
+    @Column(nullable = false)
+    private boolean required;
+
     private String version;
 }

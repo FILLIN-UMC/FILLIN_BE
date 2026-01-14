@@ -27,4 +27,8 @@ public class Alarm extends BaseTimeEntity {
     private Long referId; // 이동할 타겟 ID (제보 ID 등), 필요 시 연관관계 매핑으로 변경 가능
 
     private Boolean isRead;
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }

@@ -18,9 +18,11 @@ public enum ErrorCode implements BaseCode {
     // member Error
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"USER404","사용자를 찾을 수 없습니다."),
     DUPLICATE_NICKNAME(HttpStatus.MULTI_STATUS,"USER4031","중복된 닉네임입니다."),
+    DUPLICATE_EMAIL(HttpStatus.MULTI_STATUS,"USER4030","중복된 이메일입니다."),
     USER_NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "USER_401", "로그인 하지 않았습니다."),
     USER_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "USER_403", "권한이 없습니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.ALREADY_REPORTED, "USER_400", "해당 닉네임이 존재합니다."),
+    PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST, "AUTH_400_PW_MISMATCH", "비밀번호가 일치하지 않습니다."),
 
     // Report Error
     REPORT_NOT_FOUND(HttpStatus.NOT_FOUND,"REPORT404","제보를 찾을 수 없습니다."),

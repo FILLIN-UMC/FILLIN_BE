@@ -27,6 +27,10 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true)
     private String email;
 
+    // 테스트 위한 개발용 로그인
+    @Column
+    private String password;
+
     @Column(length = 15)
     private String nickname;
 

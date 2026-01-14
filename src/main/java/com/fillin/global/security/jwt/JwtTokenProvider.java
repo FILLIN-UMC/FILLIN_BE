@@ -94,7 +94,7 @@ public class JwtTokenProvider {
         if (raw == null) return false;
 
         try {
-            jwtParser.parseClaimsJws(token);
+            jwtParser.parseClaimsJws(raw);
             return true;
         } catch (JwtException e) {
             log.info("Invalid JWT token", e);

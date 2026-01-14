@@ -80,8 +80,8 @@ public class OAuthServiceImpl implements OAuthService {
         String refreshToken = jwtTokenProvider.createRefreshToken(member,email,SocialType.KAKAO);
 
         member.updateRefreshToken(refreshToken);
+        memberRepository.save(member);
 
-        // (선택) 헤더로도 내려줄 거면 유지
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("X-Refresh-Token", refreshToken);
 

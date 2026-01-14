@@ -1,3 +1,3 @@
 package com.fillin.domain.enums;
 
-public enum SocialType { KAKAO, GOOGLE }
+public enum SocialType { KAKAO, GOOGLE, LOCAL }

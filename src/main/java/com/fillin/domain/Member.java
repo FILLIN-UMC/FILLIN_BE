@@ -23,7 +23,7 @@ public class Member extends BaseTimeEntity {
     @Column(name = "member_id")
     private Long id;
 
-    //온보딩 전이라 이메일, 닉네임 null 허용)
+    // 온보딩 전이라 이메일, 닉네임 null 허용)
     @Column(unique = true)
     private String email;
 
@@ -44,7 +44,6 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Achievement achievement;
 
-
     @Enumerated(EnumType.STRING)
     private Boangwan boangwan;
 
@@ -63,11 +62,10 @@ public class Member extends BaseTimeEntity {
     @Column(length = 255)
     private String fcmToken;
 
-    @Column(nullable = false)
-    private boolean alarmEnabled;
-
-    public Member(Long id, String nickname, String email, String profileImageUrl, SocialType socialType, String socialId,
-                  Achievement achievement, Role role, MemberStatus status,Boangwan boangwan, Haegyeolsa haegyeolsa, Tamheomga tamheomga) {
+    public Member(Long id, String nickname, String email, String profileImageUrl, SocialType socialType,
+            String socialId,
+            Achievement achievement, Role role, MemberStatus status, Boangwan boangwan, Haegyeolsa haegyeolsa,
+            Tamheomga tamheomga) {
         this.id = id;
         this.nickname = nickname;
         this.email = email;
@@ -98,7 +96,7 @@ public class Member extends BaseTimeEntity {
         this.tamheomga = newRank;
     }
 
-    //소셜로그인 후 정상 회원 확인
+    // 소셜로그인 후 정상 회원 확인
     @Column(nullable = false)
     private boolean onboarded;
 
@@ -120,8 +118,8 @@ public class Member extends BaseTimeEntity {
         Member member = new Member();
         member.socialType = socialType;
         member.socialId = socialId;
-        member.email = email;          // null 가능(온보딩 전)
-        member.onboarded = false;      // 기본값
+        member.email = email; // null 가능(온보딩 전)
+        member.onboarded = false; // 기본값
         return member;
     }
 
@@ -129,26 +127,20 @@ public class Member extends BaseTimeEntity {
         this.refreshToken = refreshToken; // logout -> null 가능
     }
 
-    //온보딩 작업 완료시
+    // 온보딩 작업 완료시
     public void markOnboarded() {
         this.onboarded = true;
     }
 
-    //온보딩에서 닉네임 설정
-    public void updateNicknameAndEmail(String nickname,String email) {
+    // 온보딩에서 닉네임 설정
+    public void updateNicknameAndEmail(String nickname, String email) {
         this.nickname = nickname;
         this.email = email;
     }
-    //알림 FCM 토큰
+
+    // 알림 FCM 토큰
     public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
     }
 
-    //알림 동의 여부
-    public void updateAlarmEnabled(boolean enabled) {
-        this.alarmEnabled = enabled;
-    }
-
-
 }
-

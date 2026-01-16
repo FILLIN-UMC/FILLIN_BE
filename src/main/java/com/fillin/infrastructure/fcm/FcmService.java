@@ -1,5 +1,6 @@
 package com.fillin.infrastructure.fcm;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
@@ -19,8 +20,15 @@ public class FcmService {
             String title,
             String body,
             Map<String, String> data) {
-        if (token == null || token.isBlank())
+
+        if (FirebaseApp.getApps().isEmpty()) {
+            log.info("[FCM] Firebase not initialized. Skip send.");
             return;
+        }
+
+        if (token == null || token.isBlank()) {
+            return;
+        }
 
         Message message = Message.builder()
                 .setToken(token)
@@ -36,7 +44,6 @@ public class FcmService {
             FirebaseMessaging.getInstance().send(message);
         } catch (Exception e) {
             log.warn("FCM 전송 실패 (Token: {}): {}", token, e.getMessage());
-            // TODO: 여기서 만료된 토큰인 경우 DB에서 삭제하거나 처리하는 로직 추가 가능
         }
     }
 }

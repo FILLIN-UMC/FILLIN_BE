@@ -1,11 +1,8 @@
 package com.fillin.service.alarm;
 
 import com.fillin.domain.Alarm;
-import com.fillin.domain.Member;
 import com.fillin.dto.alarm.response.AlarmResponse;
-import com.fillin.dto.alarm.response.AlarmSettingResponse;
 import com.fillin.repository.alarm.AlarmRepository;
-import com.fillin.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,20 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AlarmService {
 
-    private final MemberRepository memberRepository;
     private final AlarmRepository alarmRepository;
-
-    @Transactional(readOnly = true)
-    public AlarmSettingResponse getAlarmSetting() {
-        Member member = getCurrentMember();
-        return new AlarmSettingResponse(member.isAlarmEnabled());
-    }
-
-    @Transactional
-    public void updateAlarmEnabled(boolean enabled) {
-        Member member = getCurrentMember();
-        member.updateAlarmEnabled(enabled);
-    }
 
     @Transactional(readOnly = true)
     public List<AlarmResponse> getAlarms(Boolean read) {
@@ -49,12 +33,6 @@ public class AlarmService {
                 .stream()
                 .map(AlarmResponse::from)
                 .toList();
-    }
-
-    private Member getCurrentMember() {
-        Long memberId = getCurrentMemberId();
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
     }
 
     // TODO: 추후 JWT에서 꺼내도록 교체

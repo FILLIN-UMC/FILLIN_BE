@@ -21,7 +21,7 @@ import java.util.List;
 @Tag(name = "검색", description = "검색 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/search")
+@RequestMapping("/api/search")
 public class SearchHistoryController {
 
     private final SearchHistoryService searchHistoryService;

@@ -2,6 +2,8 @@ package com.fillin.service.alarm;
 
 import com.fillin.domain.Alarm;
 import com.fillin.dto.alarm.response.AlarmResponse;
+import com.fillin.global.apiPayload.code.ErrorCode;
+import com.fillin.global.apiPayload.exception.GlobalException;
 import com.fillin.repository.alarm.AlarmRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -45,7 +47,7 @@ public class AlarmService {
         Long memberId = getCurrentMemberId();
 
         Alarm alarm = alarmRepository.findByIdAndMemberId(alarmId, memberId)
-                .orElseThrow(() -> new IllegalArgumentException("알람이 존재하지 않습니다."));
+                .orElseThrow(() -> new GlobalException(ErrorCode.ALARM_NOT_FOUND));
 
         if (Boolean.FALSE.equals(alarm.getIsRead())) {
             alarm.markAsRead();

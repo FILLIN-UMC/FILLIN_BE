@@ -9,14 +9,16 @@ import com.fillin.service.searchHistory.SearchHistoryService;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.exception.BusinessException;
 import com.fillin.global.apiPayload.response.Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Tag(name = "검색", description = "검색 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/search")
@@ -24,6 +26,7 @@ public class SearchHistoryController {
 
     private final SearchHistoryService searchHistoryService;
 
+    @Operation(summary = "최근 검색어 목록 조회")
     @GetMapping("/recent/list")
     public Response<RecentSearchListResponse> getRecentSearches(
             @AuthenticationPrincipal Member member,
@@ -48,6 +51,7 @@ public class SearchHistoryController {
         return Response.ok(new RecentSearchListResponse(items, slice.hasNext()));
     }
 
+    @Operation(summary = "최근 검색어 추가")
     @PostMapping("/recent")
     public Response<Void> saveSearchKeyword(
             @AuthenticationPrincipal Member member,
@@ -61,6 +65,7 @@ public class SearchHistoryController {
         return Response.ok();
     }
 
+    @Operation(summary = "최근 검색어 삭제")
     @DeleteMapping("/recent/{id}")
     public Response<Void> deleteSearchHistory(
             @AuthenticationPrincipal Member member,
@@ -75,6 +80,7 @@ public class SearchHistoryController {
         return Response.ok(null);
     }
 
+    @Operation(summary = "최근 검색어 잔체 삭제")
     @DeleteMapping("/recent/all")
     public Response<Void> deleteAllSearchHistories(
             @AuthenticationPrincipal Member member

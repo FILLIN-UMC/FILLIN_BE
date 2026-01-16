@@ -60,6 +60,12 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private MemberStatus status;
 
+    @Column(length = 255)
+    private String fcmToken;
+
+    @Column(nullable = false)
+    private boolean alarmEnabled;
+
     public Member(Long id, String nickname, String email, String profileImageUrl, SocialType socialType, String socialId,
                   Achievement achievement, Role role, MemberStatus status,Boangwan boangwan, Haegyeolsa haegyeolsa, Tamheomga tamheomga) {
         this.id = id;
@@ -133,6 +139,16 @@ public class Member extends BaseTimeEntity {
         this.nickname = nickname;
         this.email = email;
     }
+    //알림 FCM 토큰
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
+
+    //알림 동의 여부
+    public void updateAlarmEnabled(boolean enabled) {
+        this.alarmEnabled = enabled;
+    }
+
 
 }
 

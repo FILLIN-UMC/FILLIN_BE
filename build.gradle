@@ -52,6 +52,13 @@ dependencies {
 
     // AWS S3
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:4.0.0-M1'
+
+    implementation platform("software.amazon.awssdk:bom:2.25.5")
+
+    implementation "software.amazon.awssdk:s3"
+    implementation "software.amazon.awssdk:auth"
+
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
 }
 
 tasks.named('test') {

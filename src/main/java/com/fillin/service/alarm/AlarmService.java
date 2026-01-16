@@ -7,6 +7,7 @@ import com.fillin.dto.alarm.response.AlarmSettingResponse;
 import com.fillin.repository.alarm.AlarmRepository;
 import com.fillin.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,5 +72,12 @@ public class AlarmService {
         if (Boolean.FALSE.equals(alarm.getIsRead())) {
             alarm.markAsRead();
         }
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 3 * * *")
+    public void deleteOldAlarms() {
+        LocalDateTime threeMonthsAgo = LocalDateTime.now().minusMonths(3);
+        alarmRepository.deleteByCreatedAtBefore(threeMonthsAgo);
     }
 }

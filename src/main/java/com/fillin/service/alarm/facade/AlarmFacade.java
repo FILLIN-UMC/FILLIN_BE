@@ -2,7 +2,6 @@ package com.fillin.service.alarm.facade;
 
 import com.fillin.domain.Alarm;
 import com.fillin.domain.Member;
-import com.fillin.domain.enums.AlarmType;
 import com.fillin.global.event.AlarmEvent;
 import com.fillin.infrastructure.fcm.FcmService;
 import com.fillin.repository.alarm.AlarmRepository;

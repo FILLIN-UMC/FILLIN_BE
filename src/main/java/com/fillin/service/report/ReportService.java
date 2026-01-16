@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -39,6 +41,7 @@ public class ReportService {
                 .longitude(requestDto.getLongitude())
                 .category(requestDto.getCategory())
                 .reportImageUrl(imageUrl)
+                .expiresAt(LocalDateTime.now().plusDays(30)) // 제보 만료 기간: 30일
                 .build();
 
         Report savedReport = reportRepository.save(report);

@@ -8,12 +8,14 @@ import com.fillin.domain.enums.rank.Haegyeolsa;
 import com.fillin.domain.enums.rank.Tamheomga;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.exception.GlobalException;
+import com.fillin.global.event.AlarmEvent;
 import com.fillin.global.event.ReportCreatedEvent;
 import com.fillin.repository.member.MemberRepository;
 import com.fillin.repository.report.ReportRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Component;
 public class MissionEventListener {
     private final MemberRepository memberRepository;
     private final ReportRepository reportRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @EventListener
     @Transactional
@@ -36,12 +39,20 @@ public class MissionEventListener {
     // 랭크 업데이트 로직
     private void updateMemberRank(Member member, ReportCategory category) {
 
-        //총 제보 수
+        // 총 제보 수
         int totalCount = reportRepository.countByMemberId(member.getId());
 
         Achievement newAchieve = Achievement.resolveAchievement(totalCount);
-        if(member.getAchievement() != newAchieve){
+        if (member.getAchievement() != newAchieve) {
             member.updateAchievement(newAchieve);
+
+            // 알림 전송 (Case 4)
+            String achievementLabel = getAchievementLabel(newAchieve);
+            eventPublisher.publishEvent(new AlarmEvent(
+                    member,
+                    com.fillin.domain.enums.AlarmType.LEVEL_UP,
+                    achievementLabel + " 뱃지를 획득했어요! 총 " + totalCount + "개의 제보를 완료했어요",
+                    null));
         }
 
         // 해당 카테고리의 총 제보 수 조회 (ReportRepository 활용)
@@ -69,5 +80,12 @@ public class MissionEventListener {
         }
     }
 
+    private String getAchievementLabel(Achievement achievement) {
+        return switch (achievement) {
+            case ROOKIE -> "루키";
+            case VETERAN -> "베테랑";
+            case MASTER -> "마스터";
+        };
+    }
 
 }

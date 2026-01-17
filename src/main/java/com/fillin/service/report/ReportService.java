@@ -2,7 +2,9 @@ package com.fillin.service.report;
 
 import com.fillin.domain.Member;
 import com.fillin.domain.Report;
+import com.fillin.domain.enums.ReportCategory;
 import com.fillin.dto.report.request.ReportCreateRequestDto;
+import com.fillin.dto.report.response.PopularReportResponse;
 import com.fillin.repository.member.MemberRepository;
 import com.fillin.repository.report.ReportRepository;
 import com.fillin.service.s3.S3Service;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,5 +49,24 @@ public class ReportService {
 
         Report savedReport = reportRepository.save(report);
         return savedReport.getId();
+    }
+
+    public List<PopularReportResponse> getPopularReports() {
+
+        List<Report> reports = reportRepository.findTop6ByCategoryInOrderByLikeCountDescCreatedAtDesc(
+                List.of(ReportCategory.DISCOVERY, ReportCategory.INCONVENIENCE)
+        );
+
+        return reports.stream()
+                .map(report -> new PopularReportResponse(
+                        report.getId(),
+                        report.getCategory(),
+                        report.getTitle(),
+                        report.getLatitude(),
+                        report.getLongitude(),
+                        report.getViewCount(),
+                        report.getAddress()
+                ))
+                .toList();
     }
 }

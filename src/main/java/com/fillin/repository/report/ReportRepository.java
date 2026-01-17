@@ -44,4 +44,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
         List<Report> findAllByMemberIdInLikes(@Param("memberId") Long memberId);
 
         List<Report> findTop6ByCategoryInOrderByLikeCountDescCreatedAtDesc(List<ReportCategory> reportCategories);
+
+        List<Report> findByKeywordAndLatitudeBetweenAndLongitudeBetween(
+                String keyword,
+                Double minLatitude,
+                Double maxLatitude,
+                Double minLongitude,
+                Double maxLongitude
+        );
 }

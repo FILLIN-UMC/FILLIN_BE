@@ -4,7 +4,11 @@ import com.fillin.domain.Member;
 import com.fillin.domain.Report;
 import com.fillin.domain.enums.ReportCategory;
 import com.fillin.dto.report.request.ReportCreateRequestDto;
+import com.fillin.dto.report.request.SearchResultReportRequest;
 import com.fillin.dto.report.response.PopularReportResponse;
+import com.fillin.dto.report.response.SearchResultReportResponse;
+import com.fillin.global.apiPayload.code.ErrorCode;
+import com.fillin.global.apiPayload.exception.BusinessException;
 import com.fillin.repository.member.MemberRepository;
 import com.fillin.repository.report.ReportRepository;
 import com.fillin.service.s3.S3Service;
@@ -66,6 +70,39 @@ public class ReportService {
                         report.getLongitude(),
                         report.getViewCount(),
                         report.getAddress()
+                ))
+                .toList();
+    }
+
+    public List<SearchResultReportResponse> getSearchResultReports(SearchResultReportRequest request) {
+
+        if (request.getKeyword() == null || request.getKeyword().isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_SEARCH_KEYWORD);
+        }
+
+        if (request.getMinLatitude() == null || request.getMaxLatitude() == null
+                || request.getMinLongitude() == null || request.getMaxLongitude() == null) {
+            throw new BusinessException(ErrorCode.INVALID_LOCATION_RANGE);
+        }
+
+        if (request.getMinLatitude() > request.getMaxLatitude()
+                || request.getMinLongitude() > request.getMaxLongitude()) {
+            throw new BusinessException(ErrorCode.INVALID_LOCATION_RANGE);
+        }
+
+        List<Report> reports = reportRepository.findByKeywordAndLatitudeBetweenAndLongitudeBetween(
+                request.getKeyword(),
+                request.getMinLatitude(),
+                request.getMaxLatitude(),
+                request.getMinLongitude(),
+                request.getMaxLongitude()
+        );
+
+        return reports.stream()
+                .map(report -> new SearchResultReportResponse(
+                        report.getId(),
+                        report.getLatitude(),
+                        report.getLongitude()
                 ))
                 .toList();
     }

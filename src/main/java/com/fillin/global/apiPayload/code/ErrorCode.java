@@ -55,9 +55,14 @@ public enum ErrorCode implements BaseCode {
     KAKAO_API_ERROR(HttpStatus.BAD_GATEWAY, "KAKAO_502_API", "카카오 서버와의 통신 중 오류가 발생했습니다."),
     KAKAO_INVALID_GRANT(HttpStatus.UNAUTHORIZED, "KAKAO_401_INVALID_GRANT", "유효하지 않거나 만료된 인가 코드입니다."),
     KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_401_AUTH_FAILED", "카카오 인증에 실패했습니다."),
-    ALREADY_REGISTERED_WITH_OTHER_LOGIN(HttpStatus.CONFLICT, "AUTH_409_ALREADY_REGISTERED",
-            "해당 이메일은 다른 로그인 방식으로 이미 가입되어 있습니다."),
-    SOCIAL_LOGIN_INVALID_STATE(HttpStatus.UNAUTHORIZED, "SOCIAL_401_INVALID_GRANT", "유효하지 않거나 만료된 STATE 값입니다..");
+    ALREADY_REGISTERED_WITH_OTHER_LOGIN(HttpStatus.CONFLICT, "AUTH_409_ALREADY_REGISTERED", "해당 이메일은 다른 로그인 방식으로 이미 가입되어 있습니다."),
+    SOCIAL_LOGIN_INVALID_STATE(HttpStatus.UNAUTHORIZED, "SOCIAL_401_INVALID_GRANT", "유효하지 않거나 만료된 STATE 값입니다.."),
+
+    // Google
+    GOOGLE_API_ERROR(HttpStatus.UNAUTHORIZED, "GOOGLE_400_API", "구글 서버와 통신중 오류가 발생했습니다."),
+    GOOGLE_JSON_PARSE_ERROR(HttpStatus.UNAUTHORIZED, "GOOGLE_401_JSON", "구글 프로필 파싱 중 오류가 발생했습니다."),
+    GOOGLE_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "GOOGLE_401_AUTH_FAILED", "구글 인증에 실패했습니다.");
+
 
     private final HttpStatus status;
     private final String code;

@@ -17,6 +17,14 @@ public class SocialAuthRequest {
         private String code; // 또는 accessToken
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class GoogleLoginReq {
+        @NotNull
+        private String code;
+    }
+
     @Getter @Setter
     @NoArgsConstructor
     public static class OnboardingReq {

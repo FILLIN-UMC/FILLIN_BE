@@ -6,12 +6,14 @@ import com.fillin.domain.Member;
 import com.fillin.domain.MemberAgreement;
 import com.fillin.domain.enums.SocialType;
 import com.fillin.dto.member.request.SocialAuthRequest;
+import com.fillin.dto.member.response.GoogleResponse;
 import com.fillin.dto.member.response.KakaoResponse;
 import com.fillin.dto.member.response.SocialAuthResponse;
 import com.fillin.dto.member.response.TokenResponse;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.security.exception.AuthException;
 import com.fillin.global.security.jwt.JwtTokenProvider;
+import com.fillin.global.util.oauth.GoogleUtil;
 import com.fillin.global.util.oauth.KakaoUtil;
 import com.fillin.repository.agreement.AgreementRepository;
 import com.fillin.repository.member.MemberAgreementRepository;
@@ -33,51 +35,72 @@ public class OAuthServiceImpl implements OAuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenResponseConverter tokenResponseConverter;
     private final AgreementRepository agreementRepository;
-    private final KakaoUtil kakaoUtil; // ✅ 팩토리 대신 유틸 직접 주입
+    private final KakaoUtil kakaoUtil;
+    private final GoogleUtil googleUtil;
 
     @Override
     public SocialAuthResponse socialLogin(SocialAuthRequest.LoginReq req, HttpServletResponse response) {
+        // 기존 단일 엔드포인트 호환용: req.socialType 기준으로 처리
+        // (Google은 WEB 리다이렉트 플로우로 기본 처리)
+        return processSocialLogin(req.getSocialType(), req.getCode(), response, true);
+    }
 
-        // 지금은 카카오만 먼저 할 거라서 가드
-        if (req.getSocialType() != SocialType.KAKAO) {
-            throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
-        }
+    @Override
+    public SocialAuthResponse googleLoginWeb(String code, HttpServletResponse response) {
+        return processSocialLogin(SocialType.GOOGLE, code, response, true);
+    }
 
-        // 1) code -> kakao access token
-        KakaoResponse.TokenResponse kakaoToken = kakaoUtil.requestAccessTokenWithCode(req.getCode());
+    @Override
+    public SocialAuthResponse googleLoginAndroid(String code, HttpServletResponse response) {
+        return processSocialLogin(SocialType.GOOGLE, code, response, false);
+    }
 
-        // 2) access token -> kakao profile
-        KakaoResponse.KakaoProfile profile = kakaoUtil.requestProfile(kakaoToken.getAccessToken());
-
-        // 3) 소셜 식별자(socialId) 추출
-        String socialId = String.valueOf(profile.getId());
-
+    private SocialAuthResponse processSocialLogin(SocialType socialType, String code, HttpServletResponse response, boolean isGoogleWebFlow) {
+        String socialId;
         String email;
-        if (profile.getKakaoAccount() != null) {
-            email = profile.getKakaoAccount().getEmail(); // null 가능
-        } else {
-            email = null;
+
+        switch (socialType) {
+            case KAKAO -> {
+                KakaoResponse.TokenResponse kakaoToken = kakaoUtil.requestAccessTokenWithCode(code);
+                KakaoResponse.KakaoProfile kakaoProfile = kakaoUtil.requestProfile(kakaoToken.getAccessToken());
+
+                socialId = String.valueOf(kakaoProfile.getId());
+                if (kakaoProfile.getKakaoAccount() != null) {
+                    email = kakaoProfile.getKakaoAccount().getEmail();
+                } else {
+                    email = null;
+                }
+            }
+            case GOOGLE -> {
+                // 컨트롤러에서 WEB/ANDROID 엔드포인트로 분기해 호출할 것
+                GoogleResponse.TokenResponse googleToken = isGoogleWebFlow
+                        ? googleUtil.requestAccessTokenWithCodeWeb(code)
+                        : googleUtil.requestAccessTokenWithCodeAndroid(code);
+
+                GoogleResponse.GoogleProfile googleProfile = googleUtil.requestProfile(googleToken.getAccessToken());
+
+                socialId = googleProfile.getSub();
+                email = googleProfile.getEmail();
+            }
+            default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
         }
 
-        // 4) 회원 조회 or 생성 (socialType + socialId 기준)
         Member member = memberRepository
-                .findBySocialTypeAndSocialId(SocialType.KAKAO, socialId)
+                .findBySocialTypeAndSocialId(socialType, socialId)
                 .orElseGet(() -> memberRepository.save(
-                        Member.createSocialMember(SocialType.KAKAO, socialId, email)
+                        Member.createSocialMember(socialType, socialId, email)
                 ));
 
-        // 5) 온보딩 여부 판단
         if (!isOnboarded(member)) {
-            String tempToken = jwtTokenProvider.createOnboardingToken(member.getId(),SocialType.KAKAO);
+            String tempToken = jwtTokenProvider.createOnboardingToken(member.getId(), socialType);
             return SocialAuthResponse.builder()
                     .needOnboarding(true)
                     .tempToken(tempToken)
                     .build();
         }
 
-        // 6) 온보딩 완료: 최종 JWT 발급
-        String accessToken = jwtTokenProvider.createAccessToken(member,email,SocialType.KAKAO);
-        String refreshToken = jwtTokenProvider.createRefreshToken(member,email,SocialType.KAKAO);
+        String accessToken = jwtTokenProvider.createAccessToken(member, member.getEmail(), socialType);
+        String refreshToken = jwtTokenProvider.createRefreshToken(member, member.getEmail(), socialType);
 
         member.updateRefreshToken(refreshToken);
         memberRepository.save(member);
@@ -108,8 +131,9 @@ public class OAuthServiceImpl implements OAuthService {
 
         member.markOnboarded();
 
-        String accessToken = jwtTokenProvider.createAccessToken(member,member.getEmail(),SocialType.KAKAO);
-        String refreshToken = jwtTokenProvider.createRefreshToken(member,member.getEmail(),SocialType.KAKAO);
+        SocialType socialType = member.getSocialType();
+        String accessToken = jwtTokenProvider.createAccessToken(member, member.getEmail(), socialType);
+        String refreshToken = jwtTokenProvider.createRefreshToken(member, member.getEmail(), socialType);
 
         member.updateRefreshToken(refreshToken);
 
@@ -157,9 +181,9 @@ public class OAuthServiceImpl implements OAuthService {
             throw new AuthException(ErrorCode.JWT_INVALID_TOKEN);
         }
 
-        String newAccess = jwtTokenProvider.createAccessToken(member,member.getEmail(),SocialType.KAKAO);
-        String newRefresh = jwtTokenProvider.createRefreshToken(member,member.getEmail(),SocialType.KAKAO);
-
+        SocialType socialType = member.getSocialType();
+        String newAccess = jwtTokenProvider.createAccessToken(member, member.getEmail(), socialType);
+        String newRefresh = jwtTokenProvider.createRefreshToken(member, member.getEmail(), socialType);
         member.updateRefreshToken(newRefresh);
 
         return tokenResponseConverter.toResponse(newAccess, newRefresh);

@@ -1,6 +1,8 @@
 package com.fillin.controller.member;
 
 import com.fillin.dto.alarm.request.FcmTokenRequest;
+import com.fillin.global.apiPayload.code.ResultCode;
+import com.fillin.global.apiPayload.response.Response;
 import com.fillin.service.member.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,10 +22,13 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/fcm-token")
-    @Operation(summary = "fcm 토큰 등록")
-    public void saveFcmToken(
+    @Operation(summary = "FCM 토큰 등록")
+    public Response<FcmTokenRequest> saveFcmToken(
             @Valid @RequestBody FcmTokenRequest request
     ) {
         memberService.updateFcmToken(request.getFcmToken());
+
+        return Response.ok(ResultCode.OK, request);
     }
+
 }

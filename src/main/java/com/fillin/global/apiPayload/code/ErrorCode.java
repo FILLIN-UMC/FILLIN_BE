@@ -27,6 +27,11 @@ public enum ErrorCode implements BaseCode {
     // Report Error
     REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "REPORT404", "제보를 찾을 수 없습니다."),
 
+    // Search Error
+    INVALID_SEARCH_KEYWORD(HttpStatus.BAD_REQUEST, "SEARCH401", "검색 키워드는 필수입니다."),
+    INVALID_SEARCH_TYPE(HttpStatus.BAD_REQUEST, "SEARCH402", "유효하지 않은 검색 타입입니다."),
+    INVALID_LOCATION_RANGE(HttpStatus.BAD_REQUEST, "SEARCH403", "좌표 범위가 올바르지 않습니다."),
+
     // Alarm Error
     ALARM_NOT_FOUND(HttpStatus.NOT_FOUND, "ALARM404", "알림을 찾을 수 없습니다."),
 

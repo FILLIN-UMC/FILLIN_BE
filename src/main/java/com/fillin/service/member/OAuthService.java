@@ -11,4 +11,6 @@ public interface OAuthService {
     TokenResponse completeOnboarding(Long memberId, SocialAuthRequest.OnboardingReq req);
     void logout(String refreshToken);
     TokenResponse reissue(String refreshToken);
+    SocialAuthResponse googleLoginWeb(String code, HttpServletResponse response);
+    SocialAuthResponse googleLoginAndroid(String code, HttpServletResponse response);
 }

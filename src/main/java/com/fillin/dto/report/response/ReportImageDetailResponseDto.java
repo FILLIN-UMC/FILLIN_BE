@@ -20,7 +20,7 @@ public class ReportImageDetailResponseDto {
     private String profileImageUrl;
     private Long reportId;
     private ReportCategory reportCategory;
-    private ValidType validType;
+    private String validType;
     private String reportImageUrl;
     private String title;
     private Double latitude;

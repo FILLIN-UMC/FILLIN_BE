@@ -4,6 +4,7 @@ import com.fillin.domain.Member;
 import com.fillin.domain.Report;
 import com.fillin.domain.enums.FeedbackType;
 import com.fillin.domain.enums.ReportCategory;
+import com.fillin.domain.enums.ReportStatus;
 import com.fillin.dto.mypage.response.*;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.code.ResultCode;
@@ -127,7 +128,7 @@ public class MyReportService {
                             .profileImageUrl(member.getProfileImageUrl())
                             .reportId(report.getId())
                             .reportCategory(report.getCategory())
-                            .validType(report.getValidType())
+                            .validType(report.getValidType().getDescription())
                             .reportImageUrl(report.getReportImageUrl())
                             .expireTime(report.getExpiresAt())
                             .title(report.getTitle())
@@ -150,7 +151,7 @@ public class MyReportService {
     public Response<List<MyReportListResponseDto>> getMyReportList(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
-        List<Report> reports = reportRepository.findByMemberIdAndExpiresAtAfter(memberId, LocalDateTime.now());
+        List<Report> reports = reportRepository.findByMemberIdAndStatus(memberId, ReportStatus.PUBLISHED);
 
         List<MyReportListResponseDto> dtos = reports.stream()
                 .map(
@@ -177,7 +178,7 @@ public class MyReportService {
     public Response<List<MyReportListResponseDto>> getMyReportListExpired(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
-        List<Report> reports = reportRepository.findByMemberIdAndExpiresAtBefore(memberId, LocalDateTime.now());
+        List<Report> reports = reportRepository.findByMemberIdAndStatus(member.getId(),ReportStatus.EXPIRED);
 
         List<MyReportListResponseDto> dtos = reports.stream()
                 .map(
@@ -204,7 +205,7 @@ public class MyReportService {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
         Report report = reportRepository.findById(reportId).orElseThrow(() -> new GlobalException(ErrorCode.REPORT_NOT_FOUND));
 
-        reportRepository.delete(report);
+        report.updateReportStatus(ReportStatus.EXPIRED);
 
         return Response.ok(ResultCode.OK,"report id = " + reportId + " deleted.");
     }

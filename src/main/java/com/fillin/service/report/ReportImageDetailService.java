@@ -50,7 +50,7 @@ public class ReportImageDetailService {
                 .profileImageUrl(report.getMember().getProfileImageUrl())
                 .reportId(report.getId())
                 .reportCategory(report.getCategory())
-                .validType(report.getValidType())
+                .validType(report.getValidType().getDescription())
                 .reportImageUrl(report.getReportImageUrl())
                 .expireTime(report.getExpiresAt())
                 .title(report.getTitle())

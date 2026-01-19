@@ -2,8 +2,10 @@ package com.fillin.repository.report;
 
 import com.fillin.domain.Report;
 import com.fillin.domain.enums.ReportCategory;
+import com.fillin.domain.enums.ReportStatus;
 import jakarta.persistence.Id;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -52,4 +54,41 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
                 Double minLongitude,
                 Double maxLongitude
         );
+
+        //만료 기간 지난 제보들 status 변경
+        @Modifying
+        @Query("UPDATE Report r SET r.status = com.fillin.domain.enums.ReportStatus.EXPIRED " +
+                "WHERE r.expiresAt <= :now AND r.status != com.fillin.domain.enums.ReportStatus.EXPIRED")
+        int updateStatusToExpired(@Param("now") LocalDateTime now);
+
+        //게시 2주 지난 제보들 valid타입 변경
+        @Modifying
+        @Query("UPDATE Report r SET r.validType = com.fillin.domain.enums.ValidType.INVALID " +
+                "WHERE r.createdAt <= :threshold AND r.validType != com.fillin.domain.enums.ValidType.INVALID")
+        int updateValidTypeToInvalid(@Param("threshold") LocalDateTime threshold);
+
+        // 1. 사라지는 기준: 최근 7일 동안 부정 의견(DONE)이 3건 이상인 제보 조회
+        @Query("SELECT r FROM Report r WHERE r.status = com.fillin.domain.enums.ReportStatus.PUBLISHED " +
+                "AND (SELECT COUNT(f) FROM Feedback f WHERE f.report = r " +
+                "     AND f.type = com.fillin.domain.enums.FeedbackType.DONE " +
+                "     AND f.createdAt >= :sevenDaysAgo) >= 3")
+        List<Report> findReportsWithHighNegativeFeedback(@Param("sevenDaysAgo") LocalDateTime sevenDaysAgo);
+
+        // 2. 안 유효 기준: 등록한 지 2주 이상 된 제보 INVALID로 벌크 업데이트
+        @Modifying
+        @Query("UPDATE Report r SET r.validType = com.fillin.domain.enums.ValidType.INVALID " +
+                "WHERE r.createdAt <= :twoWeeksAgo AND r.status = com.fillin.domain.enums.ReportStatus.PUBLISHED")
+        int updateOldReportsToInvalid(@Param("twoWeeksAgo") LocalDateTime twoWeeksAgo);
+
+        // 3. 비율 판단용: 상태가 PUBLISHED이고 2주가 지나지 않은 제보들 조회
+        @Query("SELECT r FROM Report r WHERE r.status = com.fillin.domain.enums.ReportStatus.PUBLISHED " +
+                "AND r.createdAt > :twoWeeksAgo AND r.createdAt <= :threeDaysAgo")
+        List<Report> findActiveReportsForRatioCheck(@Param("twoWeeksAgo") LocalDateTime twoWeeksAgo,
+                                                    @Param("threeDaysAgo") LocalDateTime threeDaysAgo);
+
+        List<Report> findByMemberIdAndStatus(Long memberId, ReportStatus status);
+
+        @Query("SELECT r FROM Report r WHERE r.status = com.fillin.domain.enums.ReportStatus.PUBLISHED " +
+                "AND r.createdAt > :twoWeeksAgo")
+        List<Report> findActiveReportsForValidation(@Param("twoWeeksAgo") LocalDateTime twoWeeksAgo);
 }

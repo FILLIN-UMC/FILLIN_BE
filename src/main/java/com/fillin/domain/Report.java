@@ -64,6 +64,13 @@ public class Report extends BaseTimeEntity {
 
     private String reportImageUrl;
 
+    // 유효성 판단 기준(비율)이 충족되기 시작한 시각
+    private LocalDateTime validTypeModifiedAt;
+
+    public void updateValidTypeModifiedAt(LocalDateTime dateTime) {
+        this.validTypeModifiedAt = dateTime;
+    }
+
     public void addLikeCount() {
         this.likeCount++;
     }
@@ -75,4 +82,14 @@ public class Report extends BaseTimeEntity {
     }
 
     public void addViewCount() {this.viewCount++;}
+
+    public void updateReportStatus(ReportStatus status){this.status = status; }
+
+    public void updateExpiresAt(LocalDateTime dateTime) {
+        this.expiresAt = dateTime;
+    }
+
+    public void updateValidType(ValidType validType){
+        this.validType = validType;
+    }
 }

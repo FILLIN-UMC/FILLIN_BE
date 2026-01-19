@@ -60,8 +60,8 @@ public class MyReportController {
         return myReportService.getMyReportListExpired(memberId);
     }
 
-    @Operation(summary = "제보 삭제", description = "유저의 제보를 삭제합니다.")
-    @DeleteMapping("{reportId}")
+    @Operation(summary = "제보 삭제", description = "유저의 제보를 삭제(만료로 변경)합니다.")
+    @PostMapping("{reportId}/expired")
     public Response<String> deleteReport(Long memberId ,@PathVariable Long reportId) {
         // Long memberId = member.getMember().getId();
         return myReportService.deleteMyReport(memberId,reportId);

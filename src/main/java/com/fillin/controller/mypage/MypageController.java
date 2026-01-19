@@ -13,10 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,9 +35,9 @@ public class MypageController {
 
     @Operation(summary = "유저 프로필 변경", description = "유저의 프로필을 변경합니다.")
     @PostMapping("/profile/edit")
-    public Response<ProfileResponseDto> updateProfile(@Param("memberId") Long memberId, ProfileRequestDto profileRequestDto) {
+    public Response<ProfileResponseDto> updateProfile(@Param("memberId") Long memberId, ProfileRequestDto profileRequestDto, @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         // Long memberId = member.getMember().getId();
-        return mypageService.updateProfile(memberId, profileRequestDto);
+        return mypageService.updateProfile(memberId, profileRequestDto, imageFile);
     }
 
     @Operation(summary = "유저 닉네임 중복 조회", description = "변경하려는 닉네임의 중복을 확인합니다.")

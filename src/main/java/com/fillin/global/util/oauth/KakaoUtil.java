@@ -38,8 +38,8 @@ public class KakaoUtil {
     @Value("${kakao.client-secret:}")
     private String clientSecret;
 
-    @Value("${kakao.client-id}")
-    private String clientId;
+    @Value("${kakao.rest-api-key}")
+    private String restapikey;
 
     @PostConstruct
     public void initAllowedRedirectUris() {
@@ -55,7 +55,7 @@ public class KakaoUtil {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", clientId);
+        params.add("rest_api_key", restapikey);
         params.add("redirect_uri", redirectUri);
         params.add("code", code);
 

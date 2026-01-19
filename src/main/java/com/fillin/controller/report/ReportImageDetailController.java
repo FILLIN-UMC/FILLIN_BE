@@ -1,11 +1,14 @@
 package com.fillin.controller.report;
 
+import com.fillin.domain.Member;
 import com.fillin.domain.enums.FeedbackType;
 import com.fillin.dto.report.response.LikeResponseDto;
 import com.fillin.dto.report.response.ReportImageDetailResponseDto;
 import com.fillin.global.apiPayload.response.Response;
+import com.fillin.global.security.annotation.AuthUser;
 import com.fillin.service.report.ReportImageDetailService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -26,13 +29,17 @@ public class ReportImageDetailController {
 
     @Operation(summary = "피드백 생성", description = "제보에 대한 피드백을 생성합니다.")
     @PostMapping("/{reportId}/feedback")
-    public Response<String> createFeedback(@PathVariable Long reportId, Long memberId, FeedbackType type){
+    @SecurityRequirement(name = "Bearer Content")
+    public Response<String> createFeedback(@PathVariable Long reportId, @AuthUser Member member, FeedbackType type){
+        Long memberId = member.getId();
         return reportImageDetailService.createFeedback(memberId, reportId, type);
     }
 
     @Operation(summary = "좋아요 토글", description = "제보에 대한 좋아요(저장) 토글입니다. 본인의 제보에 좋아요를 누를 수 없습니다.")
     @PostMapping("/{reportId}/like")
-    public Response<LikeResponseDto> likeToggle(@PathVariable Long reportId, Long memberId){
+    @SecurityRequirement(name = "Bearer Content")
+    public Response<LikeResponseDto> likeToggle(@PathVariable Long reportId, @AuthUser Member member){
+        Long memberId = member.getId();
         return reportImageDetailService.toggleLike(memberId, reportId);
     }
 }

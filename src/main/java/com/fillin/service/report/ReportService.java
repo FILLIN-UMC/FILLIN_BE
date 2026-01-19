@@ -3,6 +3,8 @@ package com.fillin.service.report;
 import com.fillin.domain.Member;
 import com.fillin.domain.Report;
 import com.fillin.domain.enums.ReportCategory;
+import com.fillin.domain.enums.ReportStatus;
+import com.fillin.domain.enums.ValidType;
 import com.fillin.dto.report.request.ReportCreateRequestDto;
 import com.fillin.dto.report.request.SearchResultReportRequest;
 import com.fillin.dto.report.response.PopularReportResponse;
@@ -48,6 +50,8 @@ public class ReportService {
                 .longitude(requestDto.getLongitude())
                 .category(requestDto.getCategory())
                 .reportImageUrl(imageUrl)
+                .status(ReportStatus.PUBLISHED)
+                .validType(ValidType.VALID)
                 .expiresAt(LocalDateTime.now().plusDays(30)) // 제보 만료 기간: 30일
                 .build();
 

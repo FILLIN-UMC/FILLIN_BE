@@ -15,9 +15,11 @@ import com.fillin.global.apiPayload.response.Response;
 import com.fillin.repository.NotiSetRepository;
 import com.fillin.repository.member.MemberRepository;
 import com.fillin.repository.report.ReportRepository;
+import com.fillin.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class MypageService {
 
     private final MemberRepository memberRepository;
     private final NotiSetRepository notiSetRepository;
+    private final S3Service s3Service;
 
     //프로필 조회
     public Response<ProfileResponseDto> getProfile(Long memberId) {
@@ -58,9 +61,16 @@ public class MypageService {
     }
 
     //프로필 수정
-    public Response<ProfileResponseDto> updateProfile(Long memberId, ProfileRequestDto profileRequestDto) {
+    public Response<ProfileResponseDto> updateProfile(Long memberId, ProfileRequestDto profileRequestDto, MultipartFile imageFile) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(()-> new GlobalException(ErrorCode.USER_NOT_FOUND));
+
+        String imageUrl = null;
+        if (imageFile != null && !imageFile.isEmpty()) {
+            imageUrl = s3Service.uploadImage(imageFile);
+        }
+
+        profileRequestDto.setProfileImageUrl(imageUrl);
 
         member.updateProfileInfo(profileRequestDto);
 

@@ -62,7 +62,7 @@ jwt:
   refresh-token-validity: ${JWT_REFRESH_EXPIRE}  # 2주
 
 kakao:
-  client-id: ${KAKAO_REST_API_KEY}
+  rest-api-key: ${KAKAO_REST_API_KEY}
   redirect-uri: http://localhost:8080/api/auth/kakao/callback    # 인가 코드
 
 google:

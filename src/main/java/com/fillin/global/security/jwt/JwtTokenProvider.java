@@ -109,7 +109,7 @@ public class JwtTokenProvider {
         }
 
         try {
-            return jwtParser.parseClaimsJws(token).getBody();
+            return jwtParser.parseClaimsJws(raw).getBody();
         } catch (ExpiredJwtException e) {
             throw new AuthException(ErrorCode.JWT_EXPIRED_TOKEN);
         } catch (JwtException e) {

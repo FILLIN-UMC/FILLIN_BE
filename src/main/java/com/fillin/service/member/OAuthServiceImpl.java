@@ -27,7 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class OAuthServiceImpl implements OAuthService {
 
     private final MemberRepository memberRepository;
@@ -115,6 +115,7 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
+    @Transactional
     public TokenResponse completeOnboarding(Long memberId, SocialAuthRequest.OnboardingReq req) {
 
         Member member = memberRepository.findById(memberId)
@@ -139,7 +140,7 @@ public class OAuthServiceImpl implements OAuthService {
 
         return tokenResponseConverter.toResponse(accessToken, refreshToken);
     }
-
+    @Transactional
     @Override
     public void logout(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {

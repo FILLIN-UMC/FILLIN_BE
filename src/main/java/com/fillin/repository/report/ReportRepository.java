@@ -4,6 +4,7 @@ import com.fillin.domain.Report;
 import com.fillin.domain.enums.ReportCategory;
 import com.fillin.domain.enums.ReportStatus;
 import jakarta.persistence.Id;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -91,4 +92,18 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
         @Query("SELECT r FROM Report r WHERE r.status = com.fillin.domain.enums.ReportStatus.PUBLISHED " +
                 "AND r.createdAt > :twoWeeksAgo")
         List<Report> findActiveReportsForValidation(@Param("twoWeeksAgo") LocalDateTime twoWeeksAgo);
+
+        // 내 주변 인기장소 발견 관련 조회 내 주변 3km 이내로 설정 좋아요 순, 상위 6개
+        @Query(value = """
+        SELECT * FROM report r 
+        WHERE ST_Distance_Sphere(POINT(r.longitude, r.latitude), POINT(:lon, :lat)) <= 3000
+        AND r.status = 'PUBLISHED'
+        ORDER BY r.like_count DESC, 
+                 ST_Distance_Sphere(POINT(r.longitude, r.latitude), POINT(:lon, :lat)) ASC
+        """, nativeQuery = true)
+        List<Report> findHotReports(
+                @Param("lat") double lat,
+                @Param("lon") double lon,
+                Pageable pageable
+        );
 }

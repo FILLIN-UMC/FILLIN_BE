@@ -16,9 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "OAuth 소셜로그인 관련 API", description = "소셜로그인 API - by 박종찬")
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "소셜 로그인/온보딩")
 @RequiredArgsConstructor
 public class OAuthController {
 

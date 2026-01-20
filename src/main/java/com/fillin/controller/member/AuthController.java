@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Auth(Test)", description = "개발/테스트용 로컬 회원가입/로그인")
+@Tag(name = "Auth(Test)", description = "개발/테스트용 로컬 회원가입/로그인 - by 박종찬")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/auth/test")

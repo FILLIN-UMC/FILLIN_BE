@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
                 .password(encodedPassword)
                 .nickname(req.getNickname())
                 .socialType(SocialType.LOCAL)
+                .onboarded(true)
                 .build();
 
         memberRepository.save(member);
@@ -50,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TokenResponse loginTestUser(AuthRequest.LogInReq req, HttpServletResponse response) {
         // 1) 유저 조회
         Member member = memberRepository.findByEmail(req.getEmail())

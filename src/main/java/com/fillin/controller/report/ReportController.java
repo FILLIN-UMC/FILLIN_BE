@@ -5,9 +5,11 @@ import com.fillin.dto.report.request.ReportCreateRequestDto;
 import com.fillin.dto.report.request.SearchResultReportRequest;
 import com.fillin.dto.report.response.PopularReportListResponse;
 import com.fillin.dto.report.response.PopularReportResponse;
+import com.fillin.dto.report.response.ReportAnalysisResponseDto;
 import com.fillin.dto.report.response.SearchResultReportResponse;
 import com.fillin.global.apiPayload.code.ResultCode;
 import com.fillin.global.apiPayload.response.Response;
+import com.fillin.service.report.ReportAnalysisService;
 import com.fillin.service.report.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +30,7 @@ import java.util.List;
 public class ReportController {
 
     private final ReportService reportService;
+    private final ReportAnalysisService reportAnalysisService;
 
     @Operation(summary = "제보 하기", description = "사용자가 새로운 제보를 등록합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -62,5 +65,14 @@ public class ReportController {
         List<SearchResultReportResponse> reports = reportService.getSearchResultReports(request);
 
         return Response.ok(ResultCode.OK, reports);
+    }
+
+    @Operation(summary = "제보 이미지 AI 분석", description = "이미지를 업로드하면 AI가 제보 제목과 카테고리(DANGER, INCONVENIENCE, DISCOVERY)를 추천해줍니다.")
+    @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response<ReportAnalysisResponseDto> analyzeReportImage(@RequestPart("image") MultipartFile image) {
+        ReportAnalysisResponseDto result = reportAnalysisService.analyzeImage(image);
+        return Response.ok(result); // ResultCode 없이 바로 객체를 넣는 경우 Response.ok(result) 사용 가능 (Response 구현에 따라 다름)
+        // 만약 Response.ok(code, data) 형태만 지원한다면 아래처럼 쓰세요:
+        // return Response.ok(ResultCode.OK, result);
     }
 }

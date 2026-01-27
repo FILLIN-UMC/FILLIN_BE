@@ -33,10 +33,6 @@ public class Report extends BaseTimeEntity {
 
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    @Lob
-    private String content;
-
     // 위도
     @Column(columnDefinition = "DECIMAL(10, 8)")
     private Double latitude;

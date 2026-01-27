@@ -12,7 +12,6 @@ public class ReportConverter {
         return HotReportResponse.builder()
                 .reportId(report.getId())
                 .title(report.getTitle())
-                .content(report.getContent())
                 .imageUrl(report.getReportImageUrl())
                 .likeCount(report.getLikeCount())
                 .address(report.getAddress())

@@ -45,7 +45,6 @@ public class ReportService {
         Report report = Report.builder()
                 .member(member)
                 .title(requestDto.getTitle())
-                .content(requestDto.getContent())
                 .latitude(requestDto.getLatitude())
                 .longitude(requestDto.getLongitude())
                 .category(requestDto.getCategory())

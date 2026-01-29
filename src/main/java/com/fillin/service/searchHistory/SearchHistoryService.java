@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class SearchHistoryService {
 
     private final SearchHistoryRepository searchHistoryRepository;
 
+    @Transactional(readOnly = true)
     public Slice<SearchHistory> getRecentSearches(
             Member member,
             LocalDateTime cursorTime,
@@ -55,6 +55,7 @@ public class SearchHistoryService {
                 );
     }
 
+    @Transactional
     public void deleteSearchHistory(Member member, Long searchHistoryId) {
         SearchHistory history = searchHistoryRepository
                 .findByIdAndMember(searchHistoryId, member)
@@ -63,6 +64,7 @@ public class SearchHistoryService {
         searchHistoryRepository.delete(history);
     }
 
+    @Transactional
     public void deleteAllSearchHistory(Member member) {
         searchHistoryRepository.deleteAllByMember(member);
     }

@@ -59,13 +59,27 @@ public class ReportController {
     @Operation(summary = "제보 검색 결과 조회", description = "검색 키워드와 맞는 결과를 조회합니다.")
     @GetMapping("/search/results")
     public Response<List<SearchResultReportResponse>> searchResults(
-            @ParameterObject SearchResultReportRequest request
+            @RequestParam String keyword,
+            @RequestParam Double minLatitude,
+            @RequestParam Double maxLatitude,
+            @RequestParam Double minLongitude,
+            @RequestParam Double maxLongitude
     ) {
+        SearchResultReportRequest request =
+                new SearchResultReportRequest(
+                        keyword,
+                        minLatitude,
+                        maxLatitude,
+                        minLongitude,
+                        maxLongitude
+                );
 
-        List<SearchResultReportResponse> reports = reportService.getSearchResultReports(request);
+        List<SearchResultReportResponse> reports =
+                reportService.getSearchResultReports(request);
 
         return Response.ok(ResultCode.OK, reports);
     }
+
 
     @Operation(summary = "제보 이미지 AI 분석", description = "이미지를 업로드하면 AI가 제보 제목과 카테고리(DANGER, INCONVENIENCE, DISCOVERY)를 추천해줍니다.")
     @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

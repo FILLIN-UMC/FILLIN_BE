@@ -1,7 +1,9 @@
 package com.fillin.service.mission.listener;
 
+import com.fillin.domain.AlarmContext;
 import com.fillin.domain.Member;
 import com.fillin.domain.enums.Achievement;
+import com.fillin.domain.enums.AlarmType;
 import com.fillin.domain.enums.ReportCategory;
 import com.fillin.domain.enums.rank.Boangwan;
 import com.fillin.domain.enums.rank.Haegyeolsa;
@@ -46,13 +48,18 @@ public class MissionEventListener {
         if (member.getAchievement() != newAchieve) {
             member.updateAchievement(newAchieve);
 
-            // 알림 전송 (Case 4)
-            String achievementLabel = getAchievementLabel(newAchieve);
+            // 🔔 LEVEL_UP 알림 전송
+            AlarmContext ctx = AlarmContext.builder()
+                    .badgeName(getAchievementLabel(newAchieve))
+                    .count(totalCount)                          // 총 제보 수
+                    .build();
+
             eventPublisher.publishEvent(new AlarmEvent(
-                    member,
-                    com.fillin.domain.enums.AlarmType.LEVEL_UP,
-                    achievementLabel + " 뱃지를 획득했어요! 총 " + totalCount + "개의 제보를 완료했어요",
-                    null));
+                    member,                 // 본인에게
+                    AlarmType.LEVEL_UP,      // 등급 상승
+                    ctx,
+                    null                    // 랜딩 없음 (마이페이지)
+            ));
         }
 
         // 해당 카테고리의 총 제보 수 조회 (ReportRepository 활용)

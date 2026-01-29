@@ -1,5 +1,6 @@
 package com.fillin.service.report;
 
+import com.fillin.domain.AlarmContext;
 import com.fillin.domain.Member;
 import com.fillin.domain.Report;
 import com.fillin.domain.enums.AlarmType;
@@ -55,12 +56,17 @@ public class ReportScheduler {
 
             messageBody.append(categoryString);
 
+            AlarmContext ctx = AlarmContext.builder()
+                    .count(3)
+                    .build();
+
             eventPublisher.publishEvent(new AlarmEvent(
                     member,
                     AlarmType.EXPIRATION,
-                    messageBody.toString(),
-                    null // 특정 제보 ID가 아닌 목록 페이지로 랜딩되므로 referId는 null 혹은 적절한 값
+                    ctx,
+                    null
             ));
+
         });
     }
 

@@ -83,12 +83,16 @@ public class ReportService {
             throw new BusinessException(ErrorCode.INVALID_SEARCH_KEYWORD);
         }
 
-        if (request.getMinLatitude() == null || request.getMaxLatitude() == null
-                || request.getMinLongitude() == null || request.getMaxLongitude() == null) {
+        // 위도 범위 + min/max 관계 동시에 검증
+        if (request.getMinLatitude() < -90 || request.getMinLatitude() > 90
+                || request.getMaxLatitude() < -90 || request.getMaxLatitude() > 90
+                || request.getMinLatitude() > request.getMaxLatitude()) {
             throw new BusinessException(ErrorCode.INVALID_LOCATION_RANGE);
         }
 
-        if (request.getMinLatitude() > request.getMaxLatitude()
+        // 경도 범위 + min/max 관계 동시에 검증
+        if (request.getMinLongitude() < -180 || request.getMinLongitude() > 180
+                || request.getMaxLongitude() < -180 || request.getMaxLongitude() > 180
                 || request.getMinLongitude() > request.getMaxLongitude()) {
             throw new BusinessException(ErrorCode.INVALID_LOCATION_RANGE);
         }

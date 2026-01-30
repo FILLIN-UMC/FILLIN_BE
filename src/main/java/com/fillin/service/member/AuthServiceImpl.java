@@ -3,8 +3,12 @@ package com.fillin.service.member;
 import com.fillin.converter.TokenResponseConverter;
 import com.fillin.domain.Member;
 import com.fillin.domain.NotificationSetting;
+import com.fillin.domain.enums.Achievement;
 import com.fillin.domain.enums.Role;
 import com.fillin.domain.enums.SocialType;
+import com.fillin.domain.enums.rank.Boangwan;
+import com.fillin.domain.enums.rank.Haegyeolsa;
+import com.fillin.domain.enums.rank.Tamheomga;
 import com.fillin.dto.member.request.AuthRequest;
 import com.fillin.dto.member.response.AuthResponse;
 import com.fillin.dto.member.response.TokenResponse;
@@ -47,6 +51,10 @@ public class AuthServiceImpl implements AuthService {
                 .nickname(req.getNickname())
                 .socialType(SocialType.LOCAL)
                 .onboarded(true)
+                .achievement(Achievement.ROOKIE)
+                .boangwan(Boangwan.BOANGWAN_0)
+                .haegyoelsa(Haegyeolsa.HAEGYEOLSA_0)
+                .tamheomga(Tamheomga.TAMHEOMGA_0)
                 .build();
 
         memberRepository.save(member);

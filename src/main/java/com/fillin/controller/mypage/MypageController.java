@@ -11,6 +11,8 @@ import com.fillin.global.apiPayload.response.Response;
 import com.fillin.global.security.annotation.AuthUser;
 import com.fillin.service.mypage.MypageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +41,11 @@ public class MypageController {
     @Operation(summary = "유저 프로필 변경", description = "유저의 프로필을 변경합니다.")
     @PostMapping(value = "/profile/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<ProfileResponseDto> updateProfile(@AuthUser Long memberId,
-                                                      @RequestPart(value = "request") ProfileRequestDto profileRequestDto, @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+                                                      @Parameter(
+                                                              description = "닉네임 변경시 이용 (JSON)",
+                                                              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE) // 핵심: JSON 타입 명시
+                                                      ) ProfileRequestDto profileRequestDto,
+                                                      @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         return mypageService.updateProfile(memberId, profileRequestDto, imageFile);
     }
 

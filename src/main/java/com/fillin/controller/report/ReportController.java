@@ -13,6 +13,8 @@ import com.fillin.global.security.annotation.AuthUser;
 import com.fillin.service.report.ReportAnalysisService;
 import com.fillin.service.report.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -37,8 +39,12 @@ public class ReportController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<Long> createReport(
             @AuthUser Long memberId, // Security 설정 가정
-            @RequestPart("request") ReportCreateRequestDto request, // JSON 데이터
-            @RequestPart(value = "image", required = false) MultipartFile image // 파일 데이터
+            @Parameter(
+                    description = "제보 정보 (JSON)",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE) // 핵심: JSON 타입 명시
+            )
+            @RequestPart("request") ReportCreateRequestDto request,
+            @RequestPart(value = "image") MultipartFile image
     ) {
         Long reportId = reportService.createReport(memberId, request, image);
 

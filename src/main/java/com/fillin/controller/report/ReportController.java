@@ -9,6 +9,7 @@ import com.fillin.dto.report.response.ReportAnalysisResponseDto;
 import com.fillin.dto.report.response.SearchResultReportResponse;
 import com.fillin.global.apiPayload.code.ResultCode;
 import com.fillin.global.apiPayload.response.Response;
+import com.fillin.global.security.annotation.AuthUser;
 import com.fillin.service.report.ReportAnalysisService;
 import com.fillin.service.report.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,11 +36,10 @@ public class ReportController {
     @Operation(summary = "제보 하기", description = "사용자가 새로운 제보를 등록합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<Long> createReport(
-            @AuthenticationPrincipal UserDetails userDetails, // Security 설정 가정
+            @AuthUser Long memberId, // Security 설정 가정
             @RequestPart("request") ReportCreateRequestDto request, // JSON 데이터
             @RequestPart(value = "image", required = false) MultipartFile image // 파일 데이터
     ) {
-        Long memberId = Long.valueOf(userDetails.getUsername());
         Long reportId = reportService.createReport(memberId, request, image);
 
         return Response.ok(ResultCode.OK, reportId);

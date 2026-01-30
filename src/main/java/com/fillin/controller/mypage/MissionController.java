@@ -24,8 +24,7 @@ public class MissionController {
 
     @Operation(summary = "미션 진행도 조회", description = "각 카테고리 별 유저의 미션 진행도를 확인합니다.")
     @GetMapping
-    public Response<List<MissionStatusDto>> getMyMissionStatus(@AuthUser Member member) {
-        Long memberId = member.getId();
+    public Response<List<MissionStatusDto>> getMyMissionStatus(@AuthUser Long memberId) {
         return missionService.getMemberMissionStatus(memberId);
     }
 }

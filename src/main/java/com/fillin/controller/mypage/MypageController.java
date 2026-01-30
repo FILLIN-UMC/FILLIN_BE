@@ -31,43 +31,37 @@ public class MypageController {
 
     @Operation(summary = "유저 프로필 조회", description = "유저의 프로필을 조회합니다")
     @GetMapping("/profile")
-    public Response<ProfileResponseDto> getProfile(@AuthUser Member member) {
-        Long memberId = member.getId();
+    public Response<ProfileResponseDto> getProfile(@AuthUser Long memberId) {
         return mypageService.getProfile(memberId);
     }
 
     @Operation(summary = "유저 프로필 변경", description = "유저의 프로필을 변경합니다.")
     @PostMapping("/profile/edit")
-    public Response<ProfileResponseDto> updateProfile(@AuthUser Member member, ProfileRequestDto profileRequestDto, @RequestPart(value = "image", required = false) MultipartFile imageFile) {
-        Long memberId = member.getId();
+    public Response<ProfileResponseDto> updateProfile(@AuthUser Long memberId, ProfileRequestDto profileRequestDto, @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         return mypageService.updateProfile(memberId, profileRequestDto, imageFile);
     }
 
     @Operation(summary = "유저 닉네임 중복 조회", description = "변경하려는 닉네임의 중복을 확인합니다.")
     @GetMapping("/profile/check")
-    public Response<String> checkDupNickname(@AuthUser Member member, @Param("nickname") String nickname) {
-        Long memberId = member.getId();
+    public Response<String> checkDupNickname(@AuthUser Long memberId, @Param("nickname") String nickname) {
         return mypageService.checkDuplicateNickname(memberId, nickname);
     }
 
     @Operation(summary = "유저 랭크 조회", description = "유저의 랭크를 조회합니다.")
     @GetMapping("/profile/ranks")
-    public Response<RankResponseDto> getRanks(@AuthUser Member member) {
-        Long memberId = member.getId();
+    public Response<RankResponseDto> getRanks(@AuthUser Long memberId) {
         return mypageService.getRank(memberId);
     }
 
     @Operation(summary = "유저 알림 설정 변경", description = "알림의 수신 여부를 변경합니다")
     @PostMapping("/profile/notiSet")
-    public Response<NotificationUpdateResponseDto> updateNotiSet(@AuthUser Member member, NotificationUpdateRequestDto dto){
-        Long memberId = member.getId();
+    public Response<NotificationUpdateResponseDto> updateNotiSet(@AuthUser Long memberId, NotificationUpdateRequestDto dto){
         return mypageService.updateNotiSet(memberId,dto);
     }
 
     @Operation(summary = "유저 알림 설정 조회", description = "알림의 수신 여부를 조회합니다")
     @GetMapping("/profile/notiSet")
-    public Response<NotificationUpdateResponseDto> getNotiSet(@AuthUser Member member){
-        Long memberId = member.getId();
+    public Response<NotificationUpdateResponseDto> getNotiSet(@AuthUser Long memberId){
         return mypageService.getNotiSet(memberId);
     }
 

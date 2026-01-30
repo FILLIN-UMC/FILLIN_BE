@@ -23,6 +23,9 @@
 hs_err_pid*
 replay_pid*
 
+#firebase
+src/main/resources/firebase/firebase-service-account.json
+
 
 #environment varibles
 .env
@@ -32,6 +35,14 @@ replay_pid*
 *.iml
 .DS_Store
 
-
 .gradle/
 ./bin
+
+build/
+local.properties
+
+# Gradle 임시 파일 및 결과물
+bin/
+out/
+*.bin
+Thumbs.db

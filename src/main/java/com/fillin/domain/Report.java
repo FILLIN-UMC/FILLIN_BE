@@ -4,9 +4,12 @@ import com.fillin.domain.common.BaseTimeEntity;
 import com.fillin.domain.enums.ReportCategory;
 import com.fillin.domain.enums.ReportStatus;
 import com.fillin.domain.Member;
+import com.fillin.domain.enums.ValidType;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,10 +33,6 @@ public class Report extends BaseTimeEntity {
 
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    @Lob
-    private String content;
-
     // 위도
     @Column(columnDefinition = "DECIMAL(10, 8)")
     private Double latitude;
@@ -47,13 +46,26 @@ public class Report extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ReportStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private ValidType validType;
+
     @Column(columnDefinition = "integer default 0")
     private int viewCount;
 
     @Column(columnDefinition = "integer default 0")
+    //도움이 됐어요 = like
     private int likeCount;
 
     private LocalDateTime expiresAt; // 만료 시간
+
+    private String reportImageUrl;
+
+    // 유효성 판단 기준(비율)이 충족되기 시작한 시각
+    private LocalDateTime validTypeModifiedAt;
+
+    public void updateValidTypeModifiedAt(LocalDateTime dateTime) {
+        this.validTypeModifiedAt = dateTime;
+    }
 
     public void addLikeCount() {
         this.likeCount++;
@@ -63,5 +75,17 @@ public class Report extends BaseTimeEntity {
         if (this.likeCount > 0) {
             this.likeCount--;
         }
+    }
+
+    public void addViewCount() {this.viewCount++;}
+
+    public void updateReportStatus(ReportStatus status){this.status = status; }
+
+    public void updateExpiresAt(LocalDateTime dateTime) {
+        this.expiresAt = dateTime;
+    }
+
+    public void updateValidType(ValidType validType){
+        this.validType = validType;
     }
 }

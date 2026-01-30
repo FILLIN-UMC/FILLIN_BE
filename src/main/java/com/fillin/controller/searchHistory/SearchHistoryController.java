@@ -5,6 +5,7 @@ import com.fillin.domain.SearchHistory;
 import com.fillin.dto.searchHistory.request.SearchHistoryCreateRequest;
 import com.fillin.dto.searchHistory.response.RecentSearchListResponse;
 import com.fillin.dto.searchHistory.response.SearchHistoryResponse;
+import com.fillin.repository.member.MemberRepository;
 import com.fillin.service.searchHistory.SearchHistoryService;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.apiPayload.exception.BusinessException;
@@ -25,15 +26,17 @@ import java.util.List;
 public class SearchHistoryController {
 
     private final SearchHistoryService searchHistoryService;
+    private final MemberRepository memberRepository;
 
     @Operation(summary = "최근 검색어 목록 조회")
     @GetMapping("/recent/list")
     public Response<RecentSearchListResponse> getRecentSearches(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal Long memberId,
             @RequestParam(required = false) LocalDateTime cursorTime,
             @RequestParam(required = false) Long cursorId,
-            @RequestParam(defaultValue = "20") int size) {
-        if (member == null) {
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        if (memberId == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
         if (size <= 0 || size > 50) {
@@ -42,7 +45,13 @@ public class SearchHistoryController {
         if ((cursorTime == null) != (cursorId == null)) {
             throw new BusinessException(ErrorCode.BAD_REQUEST);
         }
-        Slice<SearchHistory> slice = searchHistoryService.getRecentSearches(member, cursorTime, cursorId, size);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Slice<SearchHistory> slice =
+                searchHistoryService.getRecentSearches(member, cursorTime, cursorId, size);
+
         List<SearchHistoryResponse> items = slice.getContent()
                 .stream()
                 .map(SearchHistoryResponse::from)
@@ -54,12 +63,19 @@ public class SearchHistoryController {
     @Operation(summary = "최근 검색어 추가")
     @PostMapping("/recent")
     public Response<Void> saveSearchKeyword(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal Long memberId,
             @RequestBody SearchHistoryCreateRequest request
     ) {
-        if (member == null) {
+        if (memberId == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
+        if (request == null || request.getKeyword() == null || request.getKeyword().isBlank()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST);
+        }
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         searchHistoryService.saveSearchKeyword(member, request.getKeyword().trim());
 
         return Response.ok();
@@ -68,29 +84,36 @@ public class SearchHistoryController {
     @Operation(summary = "최근 검색어 삭제")
     @DeleteMapping("/recent/{id}")
     public Response<Void> deleteSearchHistory(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal Long memberId,
             @PathVariable Long id
     ) {
-        if (member == null) {
+        if (memberId == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         searchHistoryService.deleteSearchHistory(member, id);
 
-        return Response.ok(null);
+        return Response.ok();
     }
 
-    @Operation(summary = "최근 검색어 잔체 삭제")
+    @Operation(summary = "최근 검색어 전체 삭제")
     @DeleteMapping("/recent/all")
     public Response<Void> deleteAllSearchHistories(
-            @AuthenticationPrincipal Member member
+            @AuthenticationPrincipal Long memberId
     ) {
-        if (member == null) {
+        if (memberId == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         searchHistoryService.deleteAllSearchHistory(member);
 
-        return Response.ok(null);
+        return Response.ok();
     }
 }
+

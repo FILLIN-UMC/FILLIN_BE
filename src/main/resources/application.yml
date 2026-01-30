@@ -79,4 +79,6 @@ springdoc:
 app:
   env: local
 
-
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="

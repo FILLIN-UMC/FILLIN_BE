@@ -13,6 +13,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -26,38 +27,51 @@ public class AlarmFacade {
         @Transactional
         @EventListener
         public void handleAlarmEvent(AlarmEvent event) {
-                Member target = event.getTarget();
-                NotificationSetting settings = notiSetRepository.findByMember(target);
+            Member target = event.getReceiver();
+            AlarmType type = event.getAlarmType();
 
-                if (settings == null || !isAlarmEnabled(settings, event.getType())) {
-                        return;
-                }
+            NotificationSetting settings = notiSetRepository
+                    .findByMember(target);
 
-                Alarm alarm = Alarm.builder()
-                                .member(target)
-                                .alarmType(event.getType())
-                                .message(event.getMessage())
-                                .referId(event.getReferId())
-                                .isRead(false)
-                                .build();
+            if (settings == null || !isAlarmEnabled(settings, type)) {
+                return;
+            }
 
-                alarmRepository.save(alarm);
+            String message = type.buildMessage(event.getContext());
 
-                fcmService.send(
-                                target.getFcmToken(),
-                                "FillIn 알림",
-                                event.getMessage(),
-                                Map.of(
-                                                "alarmId", alarm.getId().toString(),
-                                                "type", event.getType().name(),
-                                                "referId", String.valueOf(event.getReferId())));
+            Alarm alarm = Alarm.builder()
+                    .member(target)
+                    .alarmType(type)
+                    .message(message)
+                    .referId(event.getReferId())
+                    .isRead(false)
+                    .build();
+
+            alarmRepository.save(alarm);
+
+            if (target.getFcmToken() == null) return;
+
+            Map<String, String> data = new HashMap<>();
+            data.put("alarmId", alarm.getId().toString());
+            data.put("type", type.name());
+            if (event.getReferId() != null) {
+                data.put("referId", event.getReferId().toString());
+            }
+
+            fcmService.send(
+                    target.getFcmToken(),
+                    "FillIn 알림",
+                    message,
+                    data
+            );
         }
+
 
         private boolean isAlarmEnabled(NotificationSetting settings, AlarmType type) {
-                return switch (type) {
-                        case REPORT -> settings.getIsReportAlarm();
-                        case LIKE, LEVEL_UP, EXPIRATION -> settings.getIsFeedbackAlarm();
-                        case NOTICE -> settings.getIsServiceAlarm();
-                };
-        }
+                    return switch (type) {
+                            case REPORT -> settings.getIsReportAlarm();
+                            case LIKE, LEVEL_UP, EXPIRATION -> settings.getIsFeedbackAlarm();
+                            case NOTICE -> settings.getIsServiceAlarm();
+                    };
+            }
 }

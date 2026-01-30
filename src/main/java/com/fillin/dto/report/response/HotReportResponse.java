@@ -9,7 +9,6 @@ import lombok.Getter;
 public class HotReportResponse {
     private Long reportId;      // 제보 ID (상세 페이지 이동용)
     private String title;       // 제보 제목
-    private String content;     // 제보 내용 (한 줄 미리보기 등)
     private String imageUrl;    // 제보 이미지 URL
     private int likeCount;      // 좋아요 개수
     private String address;     // 주소 (텍스트)
@@ -21,7 +20,6 @@ public class HotReportResponse {
         return HotReportResponse.builder()
                 .reportId(report.getId())
                 .title(report.getTitle())
-                .content(report.getContent())
                 .imageUrl(report.getReportImageUrl()) // 엔티티 필드명: reportImageUrl
                 .likeCount(report.getLikeCount())
                 .address(report.getAddress())

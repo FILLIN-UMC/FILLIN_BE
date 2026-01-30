@@ -5,6 +5,7 @@ import com.fillin.domain.Member;
 import com.fillin.domain.enums.AlarmType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter

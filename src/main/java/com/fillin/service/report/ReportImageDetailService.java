@@ -1,9 +1,7 @@
 package com.fillin.service.report;
 
-import com.fillin.domain.Feedback;
-import com.fillin.domain.Like;
-import com.fillin.domain.Member;
-import com.fillin.domain.Report;
+import com.fillin.domain.*;
+import com.fillin.domain.enums.AlarmType;
 import com.fillin.domain.enums.FeedbackType;
 import com.fillin.dto.mypage.response.ReportExpireSoonDetailDto;
 import com.fillin.dto.report.request.FeedbackRequestDto;
@@ -88,15 +86,24 @@ public class ReportImageDetailService {
             feedbackRepository.save(feedback);
         }
 
-        // 알림 전송 (Case 1)
+        // 알림 전송 (REPORT - 피드백)
         if (!report.getMember().getId().equals(memberId)) {
+
             String feedbackLabel = getFeedbackLabel(report.getCategory(), type);
+
+            AlarmContext ctx = AlarmContext.builder()
+                    .actorName(member.getNickname())
+                    .feedback(feedbackLabel)
+                    .build();
+
             eventPublisher.publishEvent(new AlarmEvent(
-                    report.getMember(),
-                    com.fillin.domain.enums.AlarmType.LIKE, // 피드백 알림은 LIKE 타입 사용 (설정에서 피드백 알림으로 묶임)
-                    member.getNickname() + "님이 회원님의 제보에 '" + feedbackLabel + "' 피드백을 남겼어요!",
-                    report.getId()));
+                    report.getMember(),        // 알림 받는 사람 (제보 작성자)
+                    AlarmType.REPORT,          // ✅ 피드백 알림
+                    ctx,
+                    report.getId()             // 제보 ID (지도 이동용)
+            ));
         }
+
 
         return Response.ok(ResultCode.OK, "사용자가 제보 id = " + report.getId() + "에 " + type + "을 남겼습니다.");
     }
@@ -140,11 +147,16 @@ public class ReportImageDetailService {
             report.addLikeCount();
 
             // 알림 전송 (Case 2)
+            AlarmContext ctx = AlarmContext.builder()
+                    .actorName(member.getNickname())
+                    .build();
+
             eventPublisher.publishEvent(new AlarmEvent(
                     report.getMember(),
-                    com.fillin.domain.enums.AlarmType.LIKE,
-                    member.getNickname() + "님이 회원님의 제보를 저장했어요.",
-                    report.getId()));
+                    AlarmType.LIKE,
+                    ctx,
+                    report.getId()
+            ));
         } else {
             likeRepository.delete(like);
             report.removeLikeCount();

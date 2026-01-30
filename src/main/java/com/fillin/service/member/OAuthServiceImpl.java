@@ -4,6 +4,7 @@ import com.fillin.converter.TokenResponseConverter;
 import com.fillin.domain.Agreement;
 import com.fillin.domain.Member;
 import com.fillin.domain.MemberAgreement;
+import com.fillin.domain.NotificationSetting;
 import com.fillin.domain.enums.SocialType;
 import com.fillin.dto.member.request.SocialAuthRequest;
 import com.fillin.dto.member.response.GoogleResponse;
@@ -15,6 +16,7 @@ import com.fillin.global.security.exception.AuthException;
 import com.fillin.global.security.jwt.JwtTokenProvider;
 import com.fillin.global.util.oauth.GoogleUtil;
 import com.fillin.global.util.oauth.KakaoUtil;
+import com.fillin.repository.NotiSetRepository;
 import com.fillin.repository.agreement.AgreementRepository;
 import com.fillin.repository.member.MemberAgreementRepository;
 import com.fillin.repository.member.MemberRepository;
@@ -37,6 +39,7 @@ public class OAuthServiceImpl implements OAuthService {
     private final AgreementRepository agreementRepository;
     private final KakaoUtil kakaoUtil;
     private final GoogleUtil googleUtil;
+    private final NotiSetRepository notiSetRepository;
 
     @Override
     public SocialAuthResponse socialLogin(SocialAuthRequest.LoginReq req, HttpServletResponse response) {
@@ -131,6 +134,16 @@ public class OAuthServiceImpl implements OAuthService {
         saveAgreements(member, req.getAgreedAgreementIds());
 
         member.markOnboarded();
+
+        // 알림 설정 엔티티 설정 (처음엔 다 on)
+        NotificationSetting noti = NotificationSetting.builder()
+                .member(member)
+                .isServiceAlarm(true)
+                .isReportAlarm(true)
+                .isFeedbackAlarm(true)
+                .build();
+
+        notiSetRepository.save(noti);
 
         SocialType socialType = member.getSocialType();
         String accessToken = jwtTokenProvider.createAccessToken(member, member.getEmail(), socialType);

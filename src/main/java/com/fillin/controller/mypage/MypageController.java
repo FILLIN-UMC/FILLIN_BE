@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,8 +37,8 @@ public class MypageController {
     }
 
     @Operation(summary = "유저 프로필 변경", description = "유저의 프로필을 변경합니다.")
-    @PostMapping("/profile/edit")
-    public Response<ProfileResponseDto> updateProfile(@AuthUser Long memberId, ProfileRequestDto profileRequestDto, @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+    @PostMapping(value = "/profile/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response<ProfileResponseDto> updateProfile(@AuthUser Long memberId, @RequestPart(value = "request") ProfileRequestDto profileRequestDto, @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         return mypageService.updateProfile(memberId, profileRequestDto, imageFile);
     }
 

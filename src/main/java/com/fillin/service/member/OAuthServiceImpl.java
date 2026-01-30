@@ -5,7 +5,11 @@ import com.fillin.domain.Agreement;
 import com.fillin.domain.Member;
 import com.fillin.domain.MemberAgreement;
 import com.fillin.domain.NotificationSetting;
+import com.fillin.domain.enums.Achievement;
 import com.fillin.domain.enums.SocialType;
+import com.fillin.domain.enums.rank.Boangwan;
+import com.fillin.domain.enums.rank.Haegyeolsa;
+import com.fillin.domain.enums.rank.Tamheomga;
 import com.fillin.dto.member.request.SocialAuthRequest;
 import com.fillin.dto.member.response.GoogleResponse;
 import com.fillin.dto.member.response.KakaoResponse;
@@ -134,6 +138,11 @@ public class OAuthServiceImpl implements OAuthService {
         saveAgreements(member, req.getAgreedAgreementIds());
 
         member.markOnboarded();
+
+        member.updateAchievement(Achievement.ROOKIE);
+        member.updateBoangwan(Boangwan.BOANGWAN_0);
+        member.updateHaegyeolsa(Haegyeolsa.HAEGYEOLSA_0);
+        member.updateTamheomga(Tamheomga.TAMHEOMGA_0);
 
         // 알림 설정 엔티티 설정 (처음엔 다 on)
         NotificationSetting noti = NotificationSetting.builder()

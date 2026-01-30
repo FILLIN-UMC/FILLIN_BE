@@ -39,8 +39,7 @@ public class MypageController {
     @Operation(summary = "유저 프로필 변경", description = "유저의 프로필을 변경합니다.")
     @PostMapping(value = "/profile/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<ProfileResponseDto> updateProfile(@AuthUser Long memberId,
-                                                      @io.swagger.v3.oas.annotations.media.Schema(description = "제보 데이터", type = "string") ProfileRequestDto profileRequestDto,
-                                                      @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+                                                      @RequestPart(value = "request") ProfileRequestDto profileRequestDto, @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         return mypageService.updateProfile(memberId, profileRequestDto, imageFile);
     }
 

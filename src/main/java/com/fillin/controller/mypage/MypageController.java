@@ -57,7 +57,7 @@ public class MypageController {
 
     @Operation(summary = "유저 알림 설정 변경", description = "알림의 수신 여부를 변경합니다")
     @PostMapping("/profile/notiSet")
-    public Response<NotificationUpdateResponseDto> updateNotiSet(@AuthUser Long memberId, NotificationUpdateRequestDto dto){
+    public Response<NotificationUpdateResponseDto> updateNotiSet(@AuthUser Long memberId, @RequestBody NotificationUpdateRequestDto dto){
         return mypageService.updateNotiSet(memberId,dto);
     }
 

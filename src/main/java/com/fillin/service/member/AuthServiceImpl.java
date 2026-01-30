@@ -2,6 +2,7 @@ package com.fillin.service.member;
 
 import com.fillin.converter.TokenResponseConverter;
 import com.fillin.domain.Member;
+import com.fillin.domain.NotificationSetting;
 import com.fillin.domain.enums.Role;
 import com.fillin.domain.enums.SocialType;
 import com.fillin.dto.member.request.AuthRequest;
@@ -10,6 +11,7 @@ import com.fillin.dto.member.response.TokenResponse;
 import com.fillin.global.apiPayload.code.ErrorCode;
 import com.fillin.global.security.exception.AuthException;
 import com.fillin.global.security.jwt.JwtTokenProvider;
+import com.fillin.repository.NotiSetRepository;
 import com.fillin.repository.member.MemberRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenResponseConverter tokenResponseConverter;
+    private final NotiSetRepository notiSetRepository;
 
     @Transactional
     @Override
@@ -47,6 +50,15 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         memberRepository.save(member);
+
+        NotificationSetting noti = NotificationSetting.builder()
+                .member(member)
+                .isServiceAlarm(true)
+                .isReportAlarm(true)
+                .isFeedbackAlarm(true)
+                .build();
+
+        notiSetRepository.save(noti);
 
     }
 

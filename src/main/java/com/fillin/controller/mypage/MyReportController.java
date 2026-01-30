@@ -16,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@SecurityRequirement(name = "BearerAuth")
 @RequestMapping("/api/mypage/reports")
 @Tag(name = "MypageReport API", description = "내 제보 관련 API - by 황신애")
 public class MyReportController {

@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/mypage")
-@SecurityRequirement(name = "BearerAuth")
 @Tag(name = "Mypage API", description = "마이페이지 관련 API - by 황신애")
 public class MypageController {
 

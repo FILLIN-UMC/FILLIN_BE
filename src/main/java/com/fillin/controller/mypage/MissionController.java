@@ -17,7 +17,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@SecurityRequirement(name = "BearerAuth")
 @RequestMapping("/api/mypage/missions")
 @Tag(name = "Mission API", description = "미션 관련 API - by 황신애")
 public class MissionController {

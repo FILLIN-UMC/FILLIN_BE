@@ -29,7 +29,6 @@ public class ReportImageDetailController {
 
     @Operation(summary = "피드백 생성", description = "제보에 대한 피드백을 생성합니다.")
     @PostMapping("/{reportId}/feedback")
-    @SecurityRequirement(name = "BearerAuth")
     public Response<String> createFeedback(@PathVariable Long reportId, @AuthUser Member member, FeedbackType type){
         Long memberId = member.getId();
         return reportImageDetailService.createFeedback(memberId, reportId, type);
@@ -37,7 +36,6 @@ public class ReportImageDetailController {
 
     @Operation(summary = "좋아요 토글", description = "제보에 대한 좋아요(저장) 토글입니다. 본인의 제보에 좋아요를 누를 수 없습니다.")
     @PostMapping("/{reportId}/like")
-    @SecurityRequirement(name = "BearerAuth")
     public Response<LikeResponseDto> likeToggle(@PathVariable Long reportId, @AuthUser Member member){
         Long memberId = member.getId();
         return reportImageDetailService.toggleLike(memberId, reportId);

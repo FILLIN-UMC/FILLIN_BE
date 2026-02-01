@@ -143,4 +143,11 @@ public class Member extends BaseTimeEntity {
         this.fcmToken = fcmToken;
     }
 
+    //탈퇴 메서드
+    public void withdraw() {
+        this.status = MemberStatus.INACTIVE; // 상태를 비활성으로 변경
+        this.refreshToken = null;            // 리프레시 토큰 삭제
+        this.fcmToken = null;                // 푸시 알림 토큰 삭제
+    }
+
 }

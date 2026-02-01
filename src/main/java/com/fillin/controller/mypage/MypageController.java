@@ -67,4 +67,10 @@ public class MypageController {
         return mypageService.getNotiSet(memberId);
     }
 
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 진행합니다. (계정 비활성화)")
+    @DeleteMapping("/withdraw")
+    public Response<String> withdraw(@AuthUser Long memberId) {
+        return mypageService.withdrawMember(memberId);
+    }
+
 }

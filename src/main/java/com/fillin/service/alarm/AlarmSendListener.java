@@ -16,7 +16,7 @@ public class AlarmSendListener {
 
     private final FcmService fcmService;
 
-    @Async
+    @Async("alarmExecutor")
     @EventListener
     public void handle(AlarmSendEvent event) {
 

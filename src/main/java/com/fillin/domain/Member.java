@@ -148,6 +148,10 @@ public class Member extends BaseTimeEntity {
         this.status = MemberStatus.INACTIVE; // 상태를 비활성으로 변경
         this.refreshToken = null;            // 리프레시 토큰 삭제
         this.fcmToken = null;                // 푸시 알림 토큰 삭제
+        this.nickname = "탈퇴한 사용자";
+        this.profileImageUrl = null;
+        this.email = null;
+        this.socialId = null;
     }
 
 }

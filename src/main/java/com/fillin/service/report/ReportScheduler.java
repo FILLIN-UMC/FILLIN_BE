@@ -40,8 +40,7 @@ public class ReportScheduler {
         LocalDateTime targetEnd = now.plusDays(3).with(LocalTime.MAX);
 
         List<Report> expiringReports = reportRepository.findByExpiresAtBetween(targetStart, targetEnd);
-
-        // 회원별로 그룹화하여 알림 전송
+        
         Map<Member, List<Report>> reportsByMember = expiringReports.stream()
                 .collect(Collectors.groupingBy(Report::getMember));
 
@@ -61,7 +60,7 @@ public class ReportScheduler {
                     .build();
 
             eventPublisher.publishEvent(new AlarmEvent(
-                    member,
+                    member.getId(),
                     AlarmType.EXPIRATION,
                     ctx,
                     null

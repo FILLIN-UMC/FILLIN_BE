@@ -28,7 +28,7 @@ public class AlarmAdminService {
         memberRepository.findAll().forEach(member ->
                 eventPublisher.publishEvent(
                         new AlarmEvent(
-                                member,
+                                member.getId(),
                                 AlarmType.NOTICE,
                                 ctx,
                                 null

@@ -51,14 +51,14 @@ public class MissionEventListener {
             // 🔔 LEVEL_UP 알림 전송
             AlarmContext ctx = AlarmContext.builder()
                     .badgeName(getAchievementLabel(newAchieve))
-                    .count(totalCount)                          // 총 제보 수
+                    .count(totalCount)              // 총 제보 수
                     .build();
 
             eventPublisher.publishEvent(new AlarmEvent(
-                    member,                 // 본인에게
-                    AlarmType.LEVEL_UP,      // 등급 상승
+                    member.getId(),                 // 본인에게
+                    AlarmType.LEVEL_UP,             // 등급 상승
                     ctx,
-                    null                    // 랜딩 없음 (마이페이지)
+                    null                            // 랜딩 없음 (마이페이지)
             ));
         }
 

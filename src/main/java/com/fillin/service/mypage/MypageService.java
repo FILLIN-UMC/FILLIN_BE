@@ -15,6 +15,7 @@ import com.fillin.global.apiPayload.response.Response;
 import com.fillin.repository.NotiSetRepository;
 import com.fillin.repository.member.MemberRepository;
 import com.fillin.repository.report.ReportRepository;
+import com.fillin.repository.searchHistory.SearchHistoryRepository;
 import com.fillin.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class MypageService {
     private final MemberRepository memberRepository;
     private final NotiSetRepository notiSetRepository;
     private final S3Service s3Service;
+    private final SearchHistoryRepository searchHistoryRepository;
 
     //프로필 조회
     public Response<ProfileResponseDto> getProfile(Long memberId) {
@@ -134,6 +136,18 @@ public class MypageService {
 
         return Response.ok(ResultCode.OK,responseDto);
 
+    }
+
+    //탈퇴하기
+    public Response<String> withdrawMember(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+
+        member.withdraw();
+
+        searchHistoryRepository.deleteAllByMember(member);
+
+        return Response.ok(ResultCode.OK,"아이디 : " +memberId +", 회원 탈퇴가 완료되었습니다. soft delete");
     }
 
 }

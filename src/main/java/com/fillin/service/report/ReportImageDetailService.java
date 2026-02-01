@@ -97,7 +97,7 @@ public class ReportImageDetailService {
                     .build();
 
             eventPublisher.publishEvent(new AlarmEvent(
-                    report.getMember(),        // 알림 받는 사람 (제보 작성자)
+                    report.getMember().getId(),        // 알림 받는 사람 (제보 작성자)
                     AlarmType.REPORT,          // ✅ 피드백 알림
                     ctx,
                     report.getId()             // 제보 ID (지도 이동용)
@@ -152,7 +152,7 @@ public class ReportImageDetailService {
                     .build();
 
             eventPublisher.publishEvent(new AlarmEvent(
-                    report.getMember(),
+                    report.getMember().getId(), 
                     AlarmType.LIKE,
                     ctx,
                     report.getId()

@@ -5,73 +5,71 @@ import com.fillin.domain.Member;
 import com.fillin.domain.NotificationSetting;
 import com.fillin.domain.enums.AlarmType;
 import com.fillin.global.event.AlarmEvent;
-import com.fillin.infrastructure.fcm.FcmService;
+import com.fillin.global.event.AlarmSendEvent;
 import com.fillin.repository.NotiSetRepository;
 import com.fillin.repository.alarm.AlarmRepository;
+import com.fillin.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
 public class AlarmFacade {
 
-        private final AlarmRepository alarmRepository;
-        private final FcmService fcmService;
-        private final NotiSetRepository notiSetRepository;
+    private final AlarmRepository alarmRepository;
+    private final NotiSetRepository notiSetRepository;
+    private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-        @Transactional
-        @EventListener
-        public void handleAlarmEvent(AlarmEvent event) {
-            Member target = event.getReceiver();
-            AlarmType type = event.getAlarmType();
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Async
+    public void handleAlarmEvent(AlarmEvent event) {
 
-            NotificationSetting settings = notiSetRepository
-                    .findByMember(target);
+        Member target = memberRepository.findById(event.getReceiverId())
+                .orElseThrow();
 
-            if (settings == null || !isAlarmEnabled(settings, type)) {
-                return;
-            }
+        AlarmType type = event.getAlarmType();
 
-            String message = type.buildMessage(event.getContext());
+        NotificationSetting settings =
+                notiSetRepository.findByMember(target);
 
-            Alarm alarm = Alarm.builder()
-                    .member(target)
-                    .alarmType(type)
-                    .message(message)
-                    .referId(event.getReferId())
-                    .isRead(false)
-                    .build();
-
-            alarmRepository.save(alarm);
-
-            if (target.getFcmToken() == null) return;
-
-            Map<String, String> data = new HashMap<>();
-            data.put("alarmId", alarm.getId().toString());
-            data.put("type", type.name());
-            if (event.getReferId() != null) {
-                data.put("referId", event.getReferId().toString());
-            }
-
-            fcmService.send(
-                    target.getFcmToken(),
-                    "FillIn 알림",
-                    message,
-                    data
-            );
+        if (settings == null || !isAlarmEnabled(settings, type)) {
+            return;
         }
 
+        String message = type.buildMessage(event.getContext());
 
-        private boolean isAlarmEnabled(NotificationSetting settings, AlarmType type) {
-                    return switch (type) {
-                            case REPORT -> settings.getIsReportAlarm();
-                            case LIKE, LEVEL_UP, EXPIRATION -> settings.getIsFeedbackAlarm();
-                            case NOTICE -> settings.getIsServiceAlarm();
-                    };
-            }
+        Alarm alarm = Alarm.builder()
+                .member(target)
+                .alarmType(type)
+                .message(message)
+                .referId(event.getReferId())
+                .isRead(false)
+                .build();
+
+        alarmRepository.save(alarm);
+
+        // 👉 전송 이벤트 발행
+        eventPublisher.publishEvent(
+                new AlarmSendEvent(
+                        target.getFcmToken(),
+                        alarm.getId(),
+                        type,
+                        message,
+                        event.getReferId()
+                )
+        );
+    }
+
+    private boolean isAlarmEnabled(NotificationSetting settings, AlarmType type) {
+        return switch (type) {
+            case REPORT -> settings.getIsReportAlarm();
+            case LIKE, LEVEL_UP, EXPIRATION -> settings.getIsFeedbackAlarm();
+            case NOTICE -> settings.getIsServiceAlarm();
+        };
+    }
 }

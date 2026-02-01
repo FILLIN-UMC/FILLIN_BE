@@ -14,7 +14,7 @@ import java.util.Map;
 @Service
 public class FcmService {
 
-    @Async
+    @Async("alarmExecutor")
     public void send(
             String token,
             String title,

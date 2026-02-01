@@ -1,6 +1,5 @@
 package com.fillin.dto.alarm.request;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

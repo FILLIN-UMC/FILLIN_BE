@@ -55,7 +55,7 @@ public class MissionEventListener {
                     .build();
 
             eventPublisher.publishEvent(new AlarmEvent(
-                    member,                 // 본인에게
+                    member.getId(),                 // 본인에게
                     AlarmType.LEVEL_UP,      // 등급 상승
                     ctx,
                     null                    // 랜딩 없음 (마이페이지)

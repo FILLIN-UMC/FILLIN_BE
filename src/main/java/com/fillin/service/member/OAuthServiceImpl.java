@@ -46,30 +46,30 @@ public class OAuthServiceImpl implements OAuthService {
     private final NotiSetRepository notiSetRepository;
 
     @Override
-    public SocialAuthResponse socialLogin(SocialAuthRequest.LoginReq req, HttpServletResponse response) {
+    public SocialAuthResponse socialLogin(SocialAuthRequest.LoginReq req) {
         // 기존 단일 엔드포인트 호환용: req.socialType 기준으로 처리
-        // (Google은 WEB 리다이렉트 플로우로 기본 처리)
-        return processSocialLogin(req.getSocialType(), req.getCode(), response, true);
+        return processSocialLogin(req.getSocialType(), req.getAccessToken());
     }
 
     @Override
-    public SocialAuthResponse googleLoginWeb(String code, HttpServletResponse response) {
-        return processSocialLogin(SocialType.GOOGLE, code, response, true);
+    public SocialAuthResponse googleLoginWeb(String idToken) {
+        // [변경] Web용 별도 로직 불필요 -> 통합 메서드 호출
+        return processSocialLogin(SocialType.GOOGLE, idToken);
     }
 
     @Override
-    public SocialAuthResponse googleLoginAndroid(String code, HttpServletResponse response) {
-        return processSocialLogin(SocialType.GOOGLE, code, response, false);
+    public SocialAuthResponse googleLoginAndroid(String idToken) {
+        // [변경] Android용 별도 로직 불필요 -> 통합 메서드 호출
+        return processSocialLogin(SocialType.GOOGLE, idToken);
     }
 
-    private SocialAuthResponse processSocialLogin(SocialType socialType, String code, HttpServletResponse response, boolean isGoogleWebFlow) {
+    private SocialAuthResponse processSocialLogin(SocialType socialType, String accessTokenFromClient) {
         String socialId;
         String email;
 
         switch (socialType) {
             case KAKAO -> {
-                KakaoResponse.TokenResponse kakaoToken = kakaoUtil.requestAccessTokenWithCode(code);
-                KakaoResponse.KakaoProfile kakaoProfile = kakaoUtil.requestProfile(kakaoToken.getAccessToken());
+                KakaoResponse.KakaoProfile kakaoProfile = kakaoUtil.requestProfile(accessTokenFromClient);
 
                 socialId = String.valueOf(kakaoProfile.getId());
                 if (kakaoProfile.getKakaoAccount() != null) {
@@ -79,15 +79,10 @@ public class OAuthServiceImpl implements OAuthService {
                 }
             }
             case GOOGLE -> {
-                // 컨트롤러에서 WEB/ANDROID 엔드포인트로 분기해 호출할 것
-                GoogleResponse.TokenResponse googleToken = isGoogleWebFlow
-                        ? googleUtil.requestAccessTokenWithCodeWeb(code)
-                        : googleUtil.requestAccessTokenWithCodeAndroid(code);
+                GoogleResponse.GoogleProfile googleProfile = googleUtil.verifyIdToken(accessTokenFromClient);
 
-                GoogleResponse.GoogleProfile googleProfile = googleUtil.requestProfile(googleToken.getAccessToken());
-
-                socialId = googleProfile.getSub();
-                email = googleProfile.getEmail();
+                socialId = googleProfile.getSub();   // 구글 고유 ID
+                email = googleProfile.getEmail();    // 이메일
             }
             default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
         }
@@ -112,8 +107,6 @@ public class OAuthServiceImpl implements OAuthService {
         member.updateRefreshToken(refreshToken);
         memberRepository.save(member);
 
-        response.setHeader("Authorization", "Bearer " + accessToken);
-        response.setHeader("X-Refresh-Token", refreshToken);
 
         return SocialAuthResponse.builder()
                 .needOnboarding(false)

@@ -16,7 +16,6 @@ spring:
       validation-timeout: 2000
       idle-timeout: 600000
       max-lifetime: 1800000
-      connection-test-query: SELECT 1
       pool-name: FillinHikariPool
 
   management:

@@ -7,10 +7,10 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface OAuthService {
 
-    SocialAuthResponse socialLogin(SocialAuthRequest.LoginReq req, HttpServletResponse response);
+    SocialAuthResponse socialLogin(SocialAuthRequest.LoginReq req);
     TokenResponse completeOnboarding(Long memberId, SocialAuthRequest.OnboardingReq req);
     void logout(String refreshToken);
     TokenResponse reissue(String refreshToken);
-    SocialAuthResponse googleLoginWeb(String code, HttpServletResponse response);
-    SocialAuthResponse googleLoginAndroid(String code, HttpServletResponse response);
+    SocialAuthResponse googleLoginWeb(String code);
+    SocialAuthResponse googleLoginAndroid(String code);
 }

@@ -7,14 +7,15 @@ import lombok.*;
 import java.util.List;
 
 public class SocialAuthRequest {
-    @Getter @Setter
+    @Getter
+    @Setter
     @NoArgsConstructor
     public static class LoginReq {
         @NotNull
         private SocialType socialType; // KAKAO, GOOGLE
 
         @NotNull
-        private String code; // 또는 accessToken
+        private String accessToken;
     }
 
     @Getter

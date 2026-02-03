@@ -1,20 +1,22 @@
 package com.fillin.dto.member.request;
 
 import com.fillin.domain.enums.SocialType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
 
 public class SocialAuthRequest {
-    @Getter @Setter
+    @Getter
+    @Setter
     @NoArgsConstructor
     public static class LoginReq {
-        @NotNull
+
         private SocialType socialType; // KAKAO, GOOGLE
 
-        @NotNull
-        private String code; // 또는 accessToken
+        @NotBlank
+        private String accessToken;
     }
 
     @Getter

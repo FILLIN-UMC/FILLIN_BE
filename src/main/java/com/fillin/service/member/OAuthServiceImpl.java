@@ -41,56 +41,14 @@ public class OAuthServiceImpl implements OAuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenResponseConverter tokenResponseConverter;
     private final AgreementRepository agreementRepository;
-    private final KakaoUtil kakaoUtil;
-    private final GoogleUtil googleUtil;
     private final NotiSetRepository notiSetRepository;
 
+    /**
+     * Facade에서 이미 검증된 이메일/ID를 받아 DB 작업을 수행
+     */
     @Override
-    public SocialAuthResponse socialLogin(SocialAuthRequest.LoginReq req, HttpServletResponse response) {
-        // 기존 단일 엔드포인트 호환용: req.socialType 기준으로 처리
-        // (Google은 WEB 리다이렉트 플로우로 기본 처리)
-        return processSocialLogin(req.getSocialType(), req.getCode(), response, true);
-    }
-
-    @Override
-    public SocialAuthResponse googleLoginWeb(String code, HttpServletResponse response) {
-        return processSocialLogin(SocialType.GOOGLE, code, response, true);
-    }
-
-    @Override
-    public SocialAuthResponse googleLoginAndroid(String code, HttpServletResponse response) {
-        return processSocialLogin(SocialType.GOOGLE, code, response, false);
-    }
-
-    private SocialAuthResponse processSocialLogin(SocialType socialType, String code, HttpServletResponse response, boolean isGoogleWebFlow) {
-        String socialId;
-        String email;
-
-        switch (socialType) {
-            case KAKAO -> {
-                KakaoResponse.TokenResponse kakaoToken = kakaoUtil.requestAccessTokenWithCode(code);
-                KakaoResponse.KakaoProfile kakaoProfile = kakaoUtil.requestProfile(kakaoToken.getAccessToken());
-
-                socialId = String.valueOf(kakaoProfile.getId());
-                if (kakaoProfile.getKakaoAccount() != null) {
-                    email = kakaoProfile.getKakaoAccount().getEmail();
-                } else {
-                    email = null;
-                }
-            }
-            case GOOGLE -> {
-                // 컨트롤러에서 WEB/ANDROID 엔드포인트로 분기해 호출할 것
-                GoogleResponse.TokenResponse googleToken = isGoogleWebFlow
-                        ? googleUtil.requestAccessTokenWithCodeWeb(code)
-                        : googleUtil.requestAccessTokenWithCodeAndroid(code);
-
-                GoogleResponse.GoogleProfile googleProfile = googleUtil.requestProfile(googleToken.getAccessToken());
-
-                socialId = googleProfile.getSub();
-                email = googleProfile.getEmail();
-            }
-            default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
-        }
+    @Transactional
+    public SocialAuthResponse loginOrSignup(SocialType socialType, String socialId, String email) {
 
         Member member = memberRepository
                 .findBySocialTypeAndSocialId(socialType, socialId)
@@ -109,11 +67,7 @@ public class OAuthServiceImpl implements OAuthService {
         String accessToken = jwtTokenProvider.createAccessToken(member, member.getEmail(), socialType);
         String refreshToken = jwtTokenProvider.createRefreshToken(member, member.getEmail(), socialType);
 
-        member.updateRefreshToken(refreshToken);
-        memberRepository.save(member);
-
-        response.setHeader("Authorization", "Bearer " + accessToken);
-        response.setHeader("X-Refresh-Token", refreshToken);
+        member.updateRefreshToken(refreshToken); // Dirty Checking
 
         return SocialAuthResponse.builder()
                 .needOnboarding(false)

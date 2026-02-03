@@ -7,14 +7,16 @@ import com.fillin.dto.member.response.TokenResponse;
 import com.fillin.global.apiPayload.code.ResultCode;
 import com.fillin.global.apiPayload.response.Response;
 import com.fillin.global.security.annotation.AuthUser;
+import com.fillin.service.member.AuthFacade;
 import com.fillin.service.member.OAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.fillin.domain.enums.SocialType;
 
 @Tag(name = "OAuth 소셜로그인 관련 API", description = "소셜로그인 API - by 박종찬")
 @RestController
@@ -23,37 +25,26 @@ import org.springframework.web.bind.annotation.*;
 public class OAuthController {
 
     private final OAuthService oAuthService;
+    private final AuthFacade authFacade;
 
 
-    @Operation(summary = "카카오 로그인", description = "인가 코드(code)로 카카오 로그인 후 토큰 또는 온보딩 토큰을 반환합니다.")
+    @Operation(summary = "카카오 로그인", description = "토큰으로 카카오 로그인 후 엑세스 토큰 또는 온보딩 토큰을 반환합니다.")
     @PostMapping("/kakao/login")
     public Response<SocialAuthResponse> kakaoLogin(
-            @Valid @RequestBody SocialAuthRequest.LoginReq request,
-            jakarta.servlet.http.HttpServletResponse response
+            @Valid @RequestBody SocialAuthRequest.LoginReq request
     ) {
-
-        request.setSocialType(com.fillin.domain.enums.SocialType.KAKAO);
-
-        SocialAuthResponse res = oAuthService.socialLogin(request, response);
+        request.setSocialType(SocialType.KAKAO);
+        SocialAuthResponse res = authFacade.login(request);
         return Response.ok(ResultCode.OK, res);
     }
-    @Operation(summary = "구글 로그인 (WEB 리다이렉트)", description = "인가 코드(code)로 구글 로그인(WEB 리다이렉트 플로우) 후 토큰 또는 온보딩 토큰을 반환합니다.")
+    @Operation(summary = "구글 로그인", description = "구글 ID Token으로 인증 후 토큰 또는 온보딩 토큰을 반환합니다.")
     @PostMapping("/google/web/login")
-    public Response<SocialAuthResponse> googleLoginWeb(
-            @Valid @RequestBody SocialAuthRequest.GoogleLoginReq request,
-            jakarta.servlet.http.HttpServletResponse response
+    public Response<SocialAuthResponse> googleLogin(
+            @Valid @RequestBody SocialAuthRequest.LoginReq request
     ) {
-        SocialAuthResponse res = oAuthService.googleLoginWeb(request.getCode(), response);
-        return Response.ok(ResultCode.OK, res);
-    }
+        request.setSocialType(SocialType.GOOGLE);
+        SocialAuthResponse res = authFacade.login(request);
 
-    @Operation(summary = "구글 로그인 (ANDROID)", description = "인가 코드(code)로 구글 로그인(Android serverAuthCode 플로우) 후 토큰 또는 온보딩 토큰을 반환합니다.")
-    @PostMapping("/google/android/login")
-    public Response<SocialAuthResponse> googleLoginAndroid(
-            @Valid @RequestBody SocialAuthRequest.GoogleLoginReq request,
-            jakarta.servlet.http.HttpServletResponse response
-    ) {
-        SocialAuthResponse res = oAuthService.googleLoginAndroid(request.getCode(), response);
         return Response.ok(ResultCode.OK, res);
     }
 
@@ -80,19 +71,20 @@ public class OAuthController {
         oAuthService.logout(refreshToken);
         return Response.ok(ResultCode.OK, "로그아웃이 완료되었습니다.");
     }
-    // 테스트용 콜백 컨트롤러
-    @GetMapping("/kakao/callback")
-    public ResponseEntity<SocialAuthResponse> callback(
-            @RequestParam("code") String code,
-            HttpServletResponse servletResponse
-    ) {
-        SocialAuthRequest.LoginReq req = new SocialAuthRequest.LoginReq();
-        req.setSocialType(SocialType.KAKAO);
-        req.setCode(code);
 
-        SocialAuthResponse result = oAuthService.socialLogin(req, servletResponse);
-        return ResponseEntity.ok(result);
-    }
+//   //테스트용 콜백 컨트롤러
+//    @GetMapping("/kakao/callback")
+//    public ResponseEntity<SocialAuthResponse> callback(
+//            @RequestParam("code") String code,
+//            HttpServletResponse servletResponse
+//    ) {
+//        SocialAuthRequest.LoginReq req = new SocialAuthRequest.LoginReq();
+//        req.setSocialType(SocialType.KAKAO);
+//        req.setCode(code);
+//
+//        SocialAuthResponse result = oAuthService.socialLogin(req, servletResponse);
+//        return ResponseEntity.ok(result);
+//    }
 
 
 }

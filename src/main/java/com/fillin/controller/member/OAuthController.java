@@ -38,7 +38,7 @@ public class OAuthController {
         return Response.ok(ResultCode.OK, res);
     }
     @Operation(summary = "구글 로그인", description = "구글 ID Token으로 인증 후 토큰 또는 온보딩 토큰을 반환합니다.")
-    @PostMapping("/google/web/login")
+    @PostMapping("/google/login")
     public Response<SocialAuthResponse> googleLogin(
             @Valid @RequestBody SocialAuthRequest.LoginReq request
     ) {

@@ -7,6 +7,7 @@ import com.fillin.dto.member.response.TokenResponse;
 import com.fillin.global.apiPayload.code.ResultCode;
 import com.fillin.global.apiPayload.response.Response;
 import com.fillin.global.security.annotation.AuthUser;
+import com.fillin.service.member.AuthFacade;
 import com.fillin.service.member.OAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +25,7 @@ import com.fillin.domain.enums.SocialType;
 public class OAuthController {
 
     private final OAuthService oAuthService;
+    private final AuthFacade authFacade;
 
 
     @Operation(summary = "카카오 로그인", description = "토큰으로 카카오 로그인 후 엑세스 토큰 또는 온보딩 토큰을 반환합니다.")
@@ -32,7 +34,7 @@ public class OAuthController {
             @Valid @RequestBody SocialAuthRequest.LoginReq request
     ) {
         request.setSocialType(SocialType.KAKAO);
-        SocialAuthResponse res = oAuthService.socialLogin(request);
+        SocialAuthResponse res = authFacade.login(request);
         return Response.ok(ResultCode.OK, res);
     }
     @Operation(summary = "구글 로그인", description = "구글 ID Token으로 인증 후 토큰 또는 온보딩 토큰을 반환합니다.")
@@ -41,7 +43,7 @@ public class OAuthController {
             @Valid @RequestBody SocialAuthRequest.LoginReq request
     ) {
         request.setSocialType(SocialType.GOOGLE);
-        SocialAuthResponse res = oAuthService.socialLogin(request);
+        SocialAuthResponse res = authFacade.login(request);
 
         return Response.ok(ResultCode.OK, res);
     }

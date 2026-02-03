@@ -41,51 +41,14 @@ public class OAuthServiceImpl implements OAuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenResponseConverter tokenResponseConverter;
     private final AgreementRepository agreementRepository;
-    private final KakaoUtil kakaoUtil;
-    private final GoogleUtil googleUtil;
     private final NotiSetRepository notiSetRepository;
 
+    /**
+     * Facade에서 이미 검증된 이메일/ID를 받아 DB 작업을 수행
+     */
     @Override
-    public SocialAuthResponse socialLogin(SocialAuthRequest.LoginReq req) {
-        // 기존 단일 엔드포인트 호환용: req.socialType 기준으로 처리
-        return processSocialLogin(req.getSocialType(), req.getAccessToken());
-    }
-
-    @Override
-    public SocialAuthResponse googleLoginWeb(String idToken) {
-        // [변경] Web용 별도 로직 불필요 -> 통합 메서드 호출
-        return processSocialLogin(SocialType.GOOGLE, idToken);
-    }
-
-    @Override
-    public SocialAuthResponse googleLoginAndroid(String idToken) {
-        // [변경] Android용 별도 로직 불필요 -> 통합 메서드 호출
-        return processSocialLogin(SocialType.GOOGLE, idToken);
-    }
-
-    private SocialAuthResponse processSocialLogin(SocialType socialType, String accessTokenFromClient) {
-        String socialId;
-        String email;
-
-        switch (socialType) {
-            case KAKAO -> {
-                KakaoResponse.KakaoProfile kakaoProfile = kakaoUtil.requestProfile(accessTokenFromClient);
-
-                socialId = String.valueOf(kakaoProfile.getId());
-                if (kakaoProfile.getKakaoAccount() != null) {
-                    email = kakaoProfile.getKakaoAccount().getEmail();
-                } else {
-                    email = null;
-                }
-            }
-            case GOOGLE -> {
-                GoogleResponse.GoogleProfile googleProfile = googleUtil.verifyIdToken(accessTokenFromClient);
-
-                socialId = googleProfile.getSub();   // 구글 고유 ID
-                email = googleProfile.getEmail();    // 이메일
-            }
-            default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
-        }
+    @Transactional
+    public SocialAuthResponse loginOrSignup(SocialType socialType, String socialId, String email) {
 
         Member member = memberRepository
                 .findBySocialTypeAndSocialId(socialType, socialId)
@@ -104,9 +67,7 @@ public class OAuthServiceImpl implements OAuthService {
         String accessToken = jwtTokenProvider.createAccessToken(member, member.getEmail(), socialType);
         String refreshToken = jwtTokenProvider.createRefreshToken(member, member.getEmail(), socialType);
 
-        member.updateRefreshToken(refreshToken);
-        memberRepository.save(member);
-
+        member.updateRefreshToken(refreshToken); // Dirty Checking
 
         return SocialAuthResponse.builder()
                 .needOnboarding(false)

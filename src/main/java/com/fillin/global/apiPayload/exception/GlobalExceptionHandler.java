@@ -105,6 +105,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(Response.fail(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage()));
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
+        log.error("RuntimeException occurred: ", ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Response.fail(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage())); // ex.getMessage() 추가!
+    }
+
     // ===================== 예기치 못한 예외 ======================
 
     @ExceptionHandler(Exception.class)

@@ -48,6 +48,11 @@ spring:
       stack:
         auto: false
 
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
 
 server:
   tomcat:

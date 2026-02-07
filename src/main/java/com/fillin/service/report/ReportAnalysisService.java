@@ -179,80 +179,105 @@ public class ReportAnalysisService {
         return parseGcvResponse(responseBody, width, height);
     }
 
+    // 1. GCV 응답 파싱 및 영역 필터링 로직
     private List<BoundingBox> parseGcvResponse(String responseBody, int width, int height) {
         try {
             JsonNode root = objectMapper.readTree(responseBody);
             JsonNode response = root.path("responses").get(0);
             List<BoundingBox> boxes = new ArrayList<>();
+            List<BoundingBox> carBoxes = new ArrayList<>(); // 자동차 영역 저장용
 
-            // 1. 번호판 감지 (localizedObjectAnnotations)
+            // [Step 1] 객체 감지 파싱 (번호판은 즉시 추가, 자동차는 carBoxes에 저장)
             JsonNode objectAnnotations = response.path("localizedObjectAnnotations");
             if (objectAnnotations.isArray()) {
                 for (JsonNode node : objectAnnotations) {
                     String name = node.path("name").asText();
-                    log.info("GCV 감지된 객체 이름: {}", name); // 디버깅용 로그 추가
+                    JsonNode vertices = node.path("boundingPoly").path("normalizedVertices");
 
-                    // [수정] 필터링 조건 확대: "License plate" 또는 "Vehicle registration plate" 감지
-                    if ("License plate".equalsIgnoreCase(name) || "Vehicle registration plate".equalsIgnoreCase(name)) {
-                        JsonNode vertices = node.path("boundingPoly").path("normalizedVertices");
-                        boxes.add(new BoundingBox(
-                                (int)(vertices.get(0).path("y").asDouble(0) * 1000),
-                                (int)(vertices.get(0).path("x").asDouble(0) * 1000),
-                                (int)(vertices.get(2).path("y").asDouble(0) * 1000),
-                                (int)(vertices.get(2).path("x").asDouble(0) * 1000)
-                        ));
+                    if ("Car".equalsIgnoreCase(name)) {
+                        carBoxes.add(extractNormalizedBox(vertices)); // 자동차 위치 파악
+                    } else if ("License plate".equalsIgnoreCase(name) || "Vehicle registration plate".equalsIgnoreCase(name)) {
+                        boxes.add(extractNormalizedBox(vertices)); // 번호판은 무조건 추가
                     }
                 }
             }
 
-            // 2. 얼굴 감지 (faceAnnotations) - 기존 코드 유지
+            // [Step 2] 얼굴 감지 파싱 (얼굴은 무조건 추가)
             JsonNode faceAnnotations = response.path("faceAnnotations");
             if (faceAnnotations.isArray()) {
                 for (JsonNode node : faceAnnotations) {
-                    JsonNode vertices = node.path("boundingPoly").path("vertices");
-                    if (vertices.isArray() && vertices.size() >= 4) {
-                        int xmin = vertices.get(0).path("x").asInt(0);
-                        int ymin = vertices.get(0).path("y").asInt(0);
-                        int xmax = vertices.get(2).path("x").asInt(width);
-                        int ymax = vertices.get(2).path("y").asInt(height);
-
-                        boxes.add(new BoundingBox(
-                                (ymin * 1000) / height,
-                                (xmin * 1000) / width,
-                                (ymax * 1000) / height,
-                                (xmax * 1000) / width
-                        ));
-                    }
+                    boxes.add(extractPixelBox(node.path("boundingPoly").path("vertices"), width, height));
                 }
             }
 
+            // [Step 3] 텍스트 감지 (자동차 영역 안에 있는 텍스트만 선별 추가)
             JsonNode textAnnotations = response.path("textAnnotations");
             if (textAnnotations.isArray() && textAnnotations.size() > 1) {
-                // 인덱스 0은 전체 텍스트 요약이므로, 1번부터가 개별 단어 좌표입니다.
                 for (int i = 1; i < textAnnotations.size(); i++) {
-                    JsonNode vertices = textAnnotations.get(i).path("boundingPoly").path("vertices");
-                    if (vertices.isArray() && vertices.size() >= 4) {
-                        // 픽셀 좌표 -> 0~1000 정규화 좌표로 변환
-                        int xmin = vertices.get(0).path("x").asInt(0);
-                        int ymin = vertices.get(0).path("y").asInt(0);
-                        int xmax = vertices.get(2).path("x").asInt(width);
-                        int ymax = vertices.get(2).path("y").asInt(height);
+                    JsonNode textNode = textAnnotations.get(i);
+                    String detectedText = textNode.path("description").asText(); // 감지된 글자 내용
+                    BoundingBox textBox = extractPixelBox(textNode.path("boundingPoly").path("vertices"), width, height);
 
-                        boxes.add(new BoundingBox(
-                                (ymin * 1000) / height,
-                                (xmin * 1000) / width,
-                                (ymax * 1000) / height,
-                                (xmax * 1000) / width
-                        ));
+                    // 1. 숫자가 포함되어 있고 2. 자동차 영역(5% 축소) 내부에 있는 경우만!
+                    if (detectedText.matches(".*[0-9].*") && isStrictlyInsideCar(textBox, carBoxes)) {
+                        boxes.add(expandBox(textBox, 20, 10));
                     }
                 }
             }
-
             return boxes;
         } catch (Exception e) {
             log.error("GCV 파싱 실패: {}", e.getMessage());
             return List.of();
         }
+    }
+
+    // 2. 텍스트가 자동차 영역 내부에 있는지 검증하는 헬퍼 메서드
+    private boolean isStrictlyInsideCar(BoundingBox text, List<BoundingBox> cars) {
+        for (BoundingBox car : cars) {
+            // 가로 세로 5%씩 안쪽으로 좁힌 경계선 계산
+            int marginX = (car.xmax() - car.xmin()) * 5 / 100;
+            int marginY = (car.ymax() - car.ymin()) * 5 / 100;
+
+            int centerX = (text.xmin() + text.xmax()) / 2;
+            int centerY = (text.ymin() + text.ymax()) / 2;
+
+            if (centerX >= (car.xmin() + marginX) && centerX <= (car.xmax() - marginX) &&
+                    centerY >= (car.ymin() + marginY) && centerY <= (car.ymax() - marginY)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 3. 정규화 좌표(0.0~1.0) 추출 헬퍼
+    private BoundingBox extractNormalizedBox(JsonNode vertices) {
+        return new BoundingBox(
+                (int)(vertices.get(0).path("y").asDouble(0) * 1000),
+                (int)(vertices.get(0).path("x").asDouble(0) * 1000),
+                (int)(vertices.get(2).path("y").asDouble(0) * 1000),
+                (int)(vertices.get(2).path("x").asDouble(0) * 1000)
+        );
+    }
+
+    // 4. 픽셀 좌표 추출 및 정규화(0~1000) 헬퍼
+    private BoundingBox extractPixelBox(JsonNode vertices, int width, int height) {
+        int xmin = vertices.get(0).path("x").asInt(0);
+        int ymin = vertices.get(0).path("y").asInt(0);
+        int xmax = vertices.get(2).path("x").asInt(width);
+        int ymax = vertices.get(2).path("y").asInt(height);
+
+        return new BoundingBox(
+                (ymin * 1000) / height, (xmin * 1000) / width,
+                (ymax * 1000) / height, (xmax * 1000) / width
+        );
+    }
+
+    // 5. 박스 크기 확장 헬퍼 (텍스트 박스 빈틈 메우기 용)
+    private BoundingBox expandBox(BoundingBox box, int padX, int padY) {
+        return new BoundingBox(
+                Math.max(0, box.ymin() - padY), Math.max(0, box.xmin() - padX),
+                Math.min(1000, box.ymax() + padY), Math.min(1000, box.xmax() + padX)
+        );
     }
 
     private MultipartFile applyMosaicWithImage(BufferedImage image, List<BoundingBox> boxes, MultipartFile originalFile) throws IOException {

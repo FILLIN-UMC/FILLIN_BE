@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,6 +29,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
     private final S3Service s3Service; // ★ S3Service 주입
+    private final KeywordPopularityService keywordPopularityService;
 
     public Long createReport(Long memberId, ReportCreateRequestDto requestDto, MultipartFile imageFile) {
         Member member = memberRepository.findById(memberId)
@@ -77,33 +77,35 @@ public class ReportService {
                 .toList();
     }
 
-    public List<SearchResultReportResponse> getSearchResultReports(SearchResultReportRequest request) {
+    public List<SearchResultReportResponse> getSearchResultReports(
+            SearchResultReportRequest request) {
 
         if (request.getKeyword() == null || request.getKeyword().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_SEARCH_KEYWORD);
         }
 
-        // 위도 범위 + min/max 관계 동시에 검증
         if (request.getMinLatitude() < -90 || request.getMinLatitude() > 90
                 || request.getMaxLatitude() < -90 || request.getMaxLatitude() > 90
                 || request.getMinLatitude() > request.getMaxLatitude()) {
             throw new BusinessException(ErrorCode.INVALID_LOCATION_RANGE);
         }
 
-        // 경도 범위 + min/max 관계 동시에 검증
         if (request.getMinLongitude() < -180 || request.getMinLongitude() > 180
                 || request.getMaxLongitude() < -180 || request.getMaxLongitude() > 180
                 || request.getMinLongitude() > request.getMaxLongitude()) {
             throw new BusinessException(ErrorCode.INVALID_LOCATION_RANGE);
         }
 
-        List<Report> reports = reportRepository.findByKeywordAndLatitudeBetweenAndLongitudeBetween(
-                request.getKeyword(),
-                request.getMinLatitude(),
-                request.getMaxLatitude(),
-                request.getMinLongitude(),
-                request.getMaxLongitude()
-        );
+        List<Report> reports =
+                reportRepository.findByKeywordAndLatitudeBetweenAndLongitudeBetween(
+                        request.getKeyword(),
+                        request.getMinLatitude(),
+                        request.getMaxLatitude(),
+                        request.getMinLongitude(),
+                        request.getMaxLongitude()
+                );
+
+        increaseViewCountAndKeywordScore(reports);
 
         return reports.stream()
                 .map(report -> new SearchResultReportResponse(
@@ -112,5 +114,12 @@ public class ReportService {
                         report.getLongitude()
                 ))
                 .toList();
+    }
+
+    private void increaseViewCountAndKeywordScore(List<Report> reports) {
+        for (Report report : reports) {
+            report.addViewCount();                  // DB 조회수 증가
+            keywordPopularityService.increase(report); // Redis 인기 키워드 증가
+        }
     }
 }

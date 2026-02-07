@@ -2,6 +2,10 @@ spring:
   application:
     name: fillin
 
+  data:
+    redis:
+      host: 52.78.18.130
+      port: 6379
 
   datasource:
     url: ${LOCAL_DB_URL}

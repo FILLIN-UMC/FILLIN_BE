@@ -31,6 +31,10 @@ public enum ErrorCode implements BaseCode {
     INVALID_SEARCH_KEYWORD(HttpStatus.BAD_REQUEST, "SEARCH401", "검색 키워드는 필수입니다."),
     INVALID_SEARCH_TYPE(HttpStatus.BAD_REQUEST, "SEARCH402", "유효하지 않은 검색 타입입니다."),
     INVALID_LOCATION_RANGE(HttpStatus.BAD_REQUEST, "SEARCH403", "좌표 범위가 올바르지 않습니다."),
+    AUTOCOMPLETE_INVALID_QUERY(HttpStatus.BAD_REQUEST, "SEARCH404", "자동완성 검색어는 필수입니다."),
+    AUTOCOMPLETE_CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "SEARCH405", "유효하지 않은 자동완성 카테고리입니다."),
+    AUTOCOMPLETE_DATA_NOT_INITIALIZED(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH500", "자동완성 데이터가 초기화되지 않았습니다."),
+    AUTOCOMPLETE_REDIS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH501", "자동완성 조회 중 서버 오류가 발생했습니다."),
 
     // Alarm Error
     ALARM_NOT_FOUND(HttpStatus.NOT_FOUND, "ALARM404", "알림을 찾을 수 없습니다."),

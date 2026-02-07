@@ -15,12 +15,14 @@ import com.fillin.repository.member.MemberRepository;
 import com.fillin.repository.report.ReportRepository;
 import com.fillin.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -105,7 +107,11 @@ public class ReportService {
                 request.getMaxLongitude()
         );
 
-        increaseViewCountAndKeywordScore(reports);
+        // 1️⃣ DB 업데이트 (트랜잭션 내)
+        increaseViewCount(reports);
+
+        // 2️⃣ Redis 업데이트 (트랜잭션 외)
+        increaseKeywordScore(reports);
 
         return reports.stream()
                 .map(report -> new SearchResultReportResponse(
@@ -116,10 +122,23 @@ public class ReportService {
                 .toList();
     }
 
-    private void increaseViewCountAndKeywordScore(List<Report> reports) {
+    private void increaseViewCount(List<Report> reports) {
+        // DB 조회수 증가만 수행
         for (Report report : reports) {
-            report.addViewCount();                  // DB 조회수 증가
-            keywordPopularityService.increase(report); // Redis 인기 키워드 증가
+            report.addViewCount();
         }
     }
+
+    // 트랜잭션 외부에서 Redis 처리
+    private void increaseKeywordScore(List<Report> reports) {
+        for (Report report : reports) {
+            try {
+                keywordPopularityService.increase(report);
+            } catch (Exception e) {
+                // Redis 장애 로그만 남기고 계속
+                log.warn("Redis 증가 실패: reportId={}", report.getId(), e);
+            }
+        }
+    }
+
 }

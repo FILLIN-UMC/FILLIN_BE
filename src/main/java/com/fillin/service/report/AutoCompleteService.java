@@ -63,6 +63,9 @@ public class AutoCompleteService {
     private List<AutoCompleteItemResponse> safeSearchByCategory(String query) {
         try {
             return searchByCategory(query);
+        } catch (BusinessException e) {
+            // 카테고리 오류는 그대로 throw
+            throw e;
         } catch (Exception e) {
             // Redis 장애 시 빈 리스트 반환
             return List.of();
@@ -80,7 +83,7 @@ public class AutoCompleteService {
     private List<AutoCompleteItemResponse> searchByCategory(String query) {
         String category = switch (query) {
             case "위험" -> "DANGER";
-            case "경고" -> "INCONVENIENCE";
+            case "불편" -> "INCONVENIENCE";
             case "발견" -> "DISCOVERY";
             default -> throw new BusinessException(ErrorCode.AUTOCOMPLETE_CATEGORY_NOT_FOUND);
         };

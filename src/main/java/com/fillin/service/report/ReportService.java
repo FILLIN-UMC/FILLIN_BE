@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,6 +29,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
     private final S3Service s3Service; // ★ S3Service 주입
+    private final KeywordPopularityService keywordPopularityService;
 
     public Long createReport(Long memberId, ReportCreateRequestDto requestDto, MultipartFile imageFile) {
         Member member = memberRepository.findById(memberId)
@@ -105,6 +105,8 @@ public class ReportService {
                 request.getMaxLongitude()
         );
 
+        increaseViewCountAndKeywordScore(reports);
+
         return reports.stream()
                 .map(report -> new SearchResultReportResponse(
                         report.getId(),
@@ -112,5 +114,12 @@ public class ReportService {
                         report.getLongitude()
                 ))
                 .toList();
+    }
+
+    private void increaseViewCountAndKeywordScore(List<Report> reports) {
+        for (Report report : reports) {
+            report.addViewCount();                  // DB 조회수 증가
+            keywordPopularityService.increase(report); // Redis 인기 키워드 증가
+        }
     }
 }

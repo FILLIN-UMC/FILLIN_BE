@@ -1,24 +1,18 @@
 package com.fillin.controller.report;
 
-import com.fillin.domain.Report;
 import com.fillin.dto.report.request.ReportCreateRequestDto;
 import com.fillin.dto.report.request.SearchResultReportRequest;
-import com.fillin.dto.report.response.PopularReportListResponse;
-import com.fillin.dto.report.response.PopularReportResponse;
-import com.fillin.dto.report.response.ReportAnalysisResponseDto;
-import com.fillin.dto.report.response.SearchResultReportResponse;
+import com.fillin.dto.report.response.*;
 import com.fillin.global.apiPayload.code.ResultCode;
 import com.fillin.global.apiPayload.response.Response;
 import com.fillin.global.security.annotation.AuthUser;
+import com.fillin.service.report.AutoCompleteService;
 import com.fillin.service.report.ReportAnalysisService;
 import com.fillin.service.report.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,6 +26,7 @@ public class ReportController {
 
     private final ReportService reportService;
     private final ReportAnalysisService reportAnalysisService;
+    private final AutoCompleteService autoCompleteService;
 
     @Operation(summary = "제보 하기", description = "사용자가 새로운 제보를 등록합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -78,6 +73,16 @@ public class ReportController {
                 reportService.getSearchResultReports(request);
 
         return Response.ok(ResultCode.OK, reports);
+    }
+
+    @Operation(summary = "제보 검색 시 검색어 자동완성", description = "검색어와 비슷한 키워드를 최대 5개 조회합니다.")
+    @GetMapping("/search/autocomplete")
+    public Response<AutoCompleteResponse> autocomplete(
+            @RequestParam(required = false) String keyword
+    ) {
+        AutoCompleteResponse autocompletes = autoCompleteService.autocomplete(keyword);
+
+        return Response.ok(ResultCode.OK,autocompletes);
     }
 
 

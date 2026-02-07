@@ -130,13 +130,19 @@ public class ReportAnalysisService {
         try {
             byte[] imageBytes = imageFile.getBytes();
 
-            // GCV 호출하여 번호판 좌표 리스트 바로 가져오기
-            List<BoundingBox> boxes = detectLicensePlateWithGcv(imageBytes);
+            // 이미지 크기를 미리 확인 (얼굴 좌표 정규화에 필요)
+            BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
+            if (image == null) throw new IOException("이미지 디코딩 실패");
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            // GCV 호출: 번호판과 얼굴 좌표 리스트 가져오기
+            List<BoundingBox> boxes = detectSensitiveAreasWithGcv(imageBytes, width, height);
 
             if (boxes.isEmpty()) return ReportImageProcessResponse.notDetected();
 
-            // 기존 모자이크 및 S3 업로드 로직 유지
-            MultipartFile processedImage = applyMosaic(imageBytes, boxes, imageFile);
+            // 모자이크 적용 및 S3 업로드
+            MultipartFile processedImage = applyMosaicWithImage(image, boxes, imageFile);
             String imageUrl = s3Service.uploadImage(processedImage);
 
             return ReportImageProcessResponse.detected(imageUrl);
@@ -147,14 +153,17 @@ public class ReportAnalysisService {
         }
     }
 
-    private List<BoundingBox> detectLicensePlateWithGcv(byte[] imageBytes) throws IOException {
+    private List<BoundingBox> detectSensitiveAreasWithGcv(byte[] imageBytes, int width, int height) throws IOException {
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 
-        // GCV Object Localization 요청 바디 구성
         Map<String, Object> request = Map.of(
                 "requests", List.of(Map.of(
                         "image", Map.of("content", base64Image),
-                        "features", List.of(Map.of("type", "OBJECT_LOCALIZATION"))
+                        "features", List.of(
+                                Map.of("type", "OBJECT_LOCALIZATION"), // 번호판(사물)
+                                Map.of("type", "FACE_DETECTION"),       // 얼굴
+                                Map.of("type", "TEXT_DETECTION")         // 번호판 숫자(글자) -> 추가!
+                        )
                 ))
         );
 
@@ -167,35 +176,78 @@ public class ReportAnalysisService {
                 .bodyToMono(String.class)
                 .block();
 
-        return parseGcvResponse(responseBody);
+        return parseGcvResponse(responseBody, width, height);
     }
 
-    private List<BoundingBox> parseGcvResponse(String responseBody) {
+    private List<BoundingBox> parseGcvResponse(String responseBody, int width, int height) {
         try {
             JsonNode root = objectMapper.readTree(responseBody);
-            JsonNode annotations = root.path("responses").get(0).path("localizedObjectAnnotations");
-
+            JsonNode response = root.path("responses").get(0);
             List<BoundingBox> boxes = new ArrayList<>();
-            if (annotations.isArray()) {
-                for (JsonNode node : annotations) {
+
+            // 1. 번호판 감지 (localizedObjectAnnotations)
+            JsonNode objectAnnotations = response.path("localizedObjectAnnotations");
+            if (objectAnnotations.isArray()) {
+                for (JsonNode node : objectAnnotations) {
                     String name = node.path("name").asText();
-                    // 'License plate' 객체만 필터링
-                    if ("License plate".equalsIgnoreCase(name)) {
+                    log.info("GCV 감지된 객체 이름: {}", name); // 디버깅용 로그 추가
+
+                    // [수정] 필터링 조건 확대: "License plate" 또는 "Vehicle registration plate" 감지
+                    if ("License plate".equalsIgnoreCase(name) || "Vehicle registration plate".equalsIgnoreCase(name)) {
                         JsonNode vertices = node.path("boundingPoly").path("normalizedVertices");
-
-                        // GCV는 0.0~1.0 좌표를 주므로 기존 로직(0~1000)에 맞춰 변환
-                        float xmin = (float) vertices.get(0).path("x").asDouble(0);
-                        float ymin = (float) vertices.get(0).path("y").asDouble(0);
-                        float xmax = (float) vertices.get(2).path("x").asDouble(0);
-                        float ymax = (float) vertices.get(2).path("y").asDouble(0);
-
                         boxes.add(new BoundingBox(
-                                (int)(ymin * 1000), (int)(xmin * 1000),
-                                (int)(ymax * 1000), (int)(xmax * 1000)
+                                (int)(vertices.get(0).path("y").asDouble(0) * 1000),
+                                (int)(vertices.get(0).path("x").asDouble(0) * 1000),
+                                (int)(vertices.get(2).path("y").asDouble(0) * 1000),
+                                (int)(vertices.get(2).path("x").asDouble(0) * 1000)
                         ));
                     }
                 }
             }
+
+            // 2. 얼굴 감지 (faceAnnotations) - 기존 코드 유지
+            JsonNode faceAnnotations = response.path("faceAnnotations");
+            if (faceAnnotations.isArray()) {
+                for (JsonNode node : faceAnnotations) {
+                    JsonNode vertices = node.path("boundingPoly").path("vertices");
+                    if (vertices.isArray() && vertices.size() >= 4) {
+                        int xmin = vertices.get(0).path("x").asInt(0);
+                        int ymin = vertices.get(0).path("y").asInt(0);
+                        int xmax = vertices.get(2).path("x").asInt(width);
+                        int ymax = vertices.get(2).path("y").asInt(height);
+
+                        boxes.add(new BoundingBox(
+                                (ymin * 1000) / height,
+                                (xmin * 1000) / width,
+                                (ymax * 1000) / height,
+                                (xmax * 1000) / width
+                        ));
+                    }
+                }
+            }
+
+            JsonNode textAnnotations = response.path("textAnnotations");
+            if (textAnnotations.isArray() && textAnnotations.size() > 1) {
+                // 인덱스 0은 전체 텍스트 요약이므로, 1번부터가 개별 단어 좌표입니다.
+                for (int i = 1; i < textAnnotations.size(); i++) {
+                    JsonNode vertices = textAnnotations.get(i).path("boundingPoly").path("vertices");
+                    if (vertices.isArray() && vertices.size() >= 4) {
+                        // 픽셀 좌표 -> 0~1000 정규화 좌표로 변환
+                        int xmin = vertices.get(0).path("x").asInt(0);
+                        int ymin = vertices.get(0).path("y").asInt(0);
+                        int xmax = vertices.get(2).path("x").asInt(width);
+                        int ymax = vertices.get(2).path("y").asInt(height);
+
+                        boxes.add(new BoundingBox(
+                                (ymin * 1000) / height,
+                                (xmin * 1000) / width,
+                                (ymax * 1000) / height,
+                                (xmax * 1000) / width
+                        ));
+                    }
+                }
+            }
+
             return boxes;
         } catch (Exception e) {
             log.error("GCV 파싱 실패: {}", e.getMessage());
@@ -203,48 +255,33 @@ public class ReportAnalysisService {
         }
     }
 
-    private MultipartFile applyMosaic(byte[] imageBytes, List<BoundingBox> boxes, MultipartFile originalFile) throws IOException {
-        // 1. 바이트 배열로부터 이미지 로드 (null 체크 포함)
-        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-        if (image == null) throw new IOException("이미지 파일을 디코딩할 수 없습니다.");
-
+    private MultipartFile applyMosaicWithImage(BufferedImage image, List<BoundingBox> boxes, MultipartFile originalFile) throws IOException {
         int width = image.getWidth();
         int height = image.getHeight();
-
-        // 상하로 확장할 패딩 값 (0-1000 좌표계 기준)
         int verticalPadding = 10;
 
         for (BoundingBox box : boxes) {
-            // [수정] 상하 범위를 10씩 확장 (이미지 경계 0~1000 준수)
             int paddedYmin = Math.max(0, box.ymin() - verticalPadding);
             int paddedYmax = Math.min(1000, box.ymax() + verticalPadding);
 
-            // 2. 확장된 좌표를 실제 픽셀 좌표로 변환
             int x = (box.xmin() * width) / 1000;
             int y = (paddedYmin * height) / 1000;
             int w = ((box.xmax() - box.xmin()) * width) / 1000;
             int h = ((paddedYmax - paddedYmin) * height) / 1000;
 
-            // 3. 픽셀 레벨 좌표 보정 (이미지 크기 초과 방지)
-            x = Math.max(0, x);
-            y = Math.max(0, y);
-            w = Math.min(width - x, w);
-            h = Math.min(height - y, h);
+            x = Math.max(0, x); y = Math.max(0, y);
+            w = Math.min(width - x, w); h = Math.min(height - y, h);
 
-            // 4. 모자이크 적용
             mosaicArea(image, x, y, w, h);
         }
 
-        // 5. 결과 이미지 처리 및 MultipartFile 생성
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         String extension = getExtension(originalFile.getOriginalFilename());
         ImageIO.write(image, extension.isEmpty() ? "jpg" : extension, baos);
 
         return new CustomMultipartFile(
-                baos.toByteArray(),
-                originalFile.getName(),
-                originalFile.getOriginalFilename(),
-                originalFile.getContentType()
+                baos.toByteArray(), originalFile.getName(),
+                originalFile.getOriginalFilename(), originalFile.getContentType()
         );
     }
 

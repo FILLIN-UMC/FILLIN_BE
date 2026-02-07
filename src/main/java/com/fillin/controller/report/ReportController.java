@@ -94,4 +94,14 @@ public class ReportController {
         // 만약 Response.ok(code, data) 형태만 지원한다면 아래처럼 쓰세요:
         // return Response.ok(ResultCode.OK, result);
     }
+
+    @Operation(summary = "이미지 전처리 (번호판 등 감지 및 모자이크)",
+            description = "이미지에 번호판이 있는지 확인하고, 있다면 모자이크 처리 후 S3 URL을 반환합니다. 없다면 null을 반환하여 프론트에서 원본을 업로드하도록 합니다.")
+    @PostMapping(value = "/image-process", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response<ReportImageProcessResponse> processReportImage(
+            @RequestPart(value = "image") MultipartFile image
+    ) {
+        ReportImageProcessResponse response = reportAnalysisService.processImageSmart(image);
+        return Response.ok(response);
+    }
 }

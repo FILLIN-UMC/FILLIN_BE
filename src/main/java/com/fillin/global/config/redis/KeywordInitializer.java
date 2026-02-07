@@ -1,19 +1,23 @@
 package com.fillin.global.config.redis;
 
 import com.fillin.domain.enums.KeywordCategory;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("redis")
 @RequiredArgsConstructor
-public class KeywordInitializer {
+public class KeywordInitializer implements ApplicationRunner {
 
     private final StringRedisTemplate redisTemplate;
 
-    @PostConstruct
-    public void init() {
+    @Override
+    public void run(ApplicationArguments args) {
+
         for (KeywordCategory category : KeywordCategory.values()) {
 
             String keywordKey = "keywords:" + category.name();
@@ -21,13 +25,16 @@ public class KeywordInitializer {
 
             for (String keyword : category.getKeywords()) {
 
-                // 글자 검색용
                 redisTemplate.opsForSet().add(keywordKey, keyword);
 
-                // 인기 키워드용 (임시 점수 0)
-                redisTemplate.opsForZSet().add(popularKey, keyword, 0);
+                Double score = redisTemplate.opsForZSet()
+                        .score(popularKey, keyword);
+
+                if (score == null) {
+                    redisTemplate.opsForZSet()
+                            .add(popularKey, keyword, 0);
+                }
             }
         }
     }
 }
-

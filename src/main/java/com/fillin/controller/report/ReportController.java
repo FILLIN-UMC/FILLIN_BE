@@ -28,7 +28,6 @@ public class ReportController {
     private final ReportService reportService;
     private final ReportAnalysisService reportAnalysisService;
     private final AutoCompleteService autoCompleteService;
-    private final KeywordInitializer keywordInitializer;
 
     @Operation(summary = "제보 하기", description = "사용자가 새로운 제보를 등록합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

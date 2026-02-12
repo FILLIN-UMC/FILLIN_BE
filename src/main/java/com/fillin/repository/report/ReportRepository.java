@@ -48,8 +48,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
         List<Report> findTop6ByCategoryInOrderByLikeCountDescCreatedAtDesc(List<ReportCategory> reportCategories);
 
-        List<Report> findByKeywordAndLatitudeBetweenAndLongitudeBetween(
-                String keyword,
+        List<Report> findByTitleContainingAndLatitudeBetweenAndLongitudeBetween(
+                String title,
                 Double minLatitude,
                 Double maxLatitude,
                 Double minLongitude,

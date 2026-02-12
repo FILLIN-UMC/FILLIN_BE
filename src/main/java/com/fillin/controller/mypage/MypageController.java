@@ -36,7 +36,7 @@ public class MypageController {
         return mypageService.getProfile(memberId);
     }
 
-    @Operation(summary = "유저 프로필 변경", description = "유저의 프로필을 변경합니다.")
+    @Operation(summary = "유저 프로필 변경", description = "유저의 프로필을 변경합니다. 해당부분 postman으로 테스트 부탁드립니다 (스웨거 형식 문제로 415 에러뜸)")
     @PostMapping(value = "/profile/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<ProfileResponseDto> updateProfile(@AuthUser Long memberId,
                                                       @RequestPart(value = "request") ProfileRequestDto profileRequestDto, @RequestPart(value = "image", required = false) MultipartFile imageFile) {

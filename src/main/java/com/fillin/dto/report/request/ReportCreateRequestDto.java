@@ -3,9 +3,11 @@ package com.fillin.dto.report.request;
 import com.fillin.domain.enums.ReportCategory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
+@Setter
 public class ReportCreateRequestDto {
     private String title;
     private Double latitude;

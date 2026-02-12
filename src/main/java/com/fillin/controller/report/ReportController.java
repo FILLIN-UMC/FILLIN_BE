@@ -31,12 +31,11 @@ public class ReportController {
     @Operation(summary = "제보 하기", description = "사용자가 새로운 제보를 등록합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<Long> createReport(
-            @AuthUser Long memberId, // Security 설정 가정
-            @ModelAttribute ReportCreateRequestDto request, 
-            @RequestPart(value = "image", required = false) MultipartFile image // 파일 데이터
+            @AuthUser Long memberId,
+            @RequestPart(value = "request") ReportCreateRequestDto request,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
         Long reportId = reportService.createReport(memberId, request, image);
-
         return Response.ok(ResultCode.OK, reportId);
     }
 

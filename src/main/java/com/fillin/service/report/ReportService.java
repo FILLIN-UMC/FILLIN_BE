@@ -99,7 +99,7 @@ public class ReportService {
             throw new BusinessException(ErrorCode.INVALID_LOCATION_RANGE);
         }
 
-        List<Report> reports = reportRepository.findByKeywordAndLatitudeBetweenAndLongitudeBetween(
+        List<Report> reports = reportRepository.findByTitleContainingAndLatitudeBetweenAndLongitudeBetween(
                 request.getKeyword(),
                 request.getMinLatitude(),
                 request.getMaxLatitude(),

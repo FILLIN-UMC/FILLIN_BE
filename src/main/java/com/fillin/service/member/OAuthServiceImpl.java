@@ -86,11 +86,12 @@ public class OAuthServiceImpl implements OAuthService {
         if (memberRepository.existsByNickname(req.getNickname())) {
             throw new AuthException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
+        validateRequiredAgreements(req.getAgreedAgreementIds());
+        // 이메일, 닉네임 저장
         member.updateNicknameAndEmail(req.getNickname(),req.getEmail());
-
-        // 약관 동의 저장 로직은 너희 엔티티/리포지토리에 맞춰 구현
+        // 이용약관 동의 여부 저장
         saveAgreements(member, req.getAgreedAgreementIds());
-
+        // 온보딩 완료 체크
         member.markOnboarded();
 
         member.updateAchievement(Achievement.ROOKIE);
@@ -116,6 +117,19 @@ public class OAuthServiceImpl implements OAuthService {
 
         return tokenResponseConverter.toResponse(accessToken, refreshToken);
     }
+
+    private void validateRequiredAgreements(List<Long> agreedIds) {
+
+        List<Agreement> requiredAgreements = agreementRepository.findByRequiredTrue();
+
+        for (Agreement required : requiredAgreements) {
+            if (!agreedIds.contains(required.getId())) {
+                // 필수 약관 중 하나라도 동의 목록에 없으면 에러 발생
+                throw new AuthException(ErrorCode.AGREEMENT_REQUIRED);
+            }
+        }
+    }
+
     @Transactional
     @Override
     public void logout(String refreshToken) {

@@ -53,6 +53,7 @@ public enum ErrorCode implements BaseCode {
 
     // Agreement
     AGREEMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "AGREEMENT404", "해당 약관이 존재하지 않습니다."),
+    AGREEMENT_REQUIRED(HttpStatus.BAD_REQUEST, "AGREEMENT4004", "필수 약관에 모두 동의해야 합니다."),
 
     // KaKao
     KAKAO_JSON_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "KAKAO_500_JSON", "카카오 프로필 파싱 중 오류가 발생했습니다."),

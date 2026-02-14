@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.1'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id "io.sentry.jvm.gradle" version "5.2.0"
 }
 
 group = 'com.fillin'
@@ -37,6 +38,10 @@ dependencies {
 	//health check
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+	// Monitoring Sentry setting
+	implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.1.0' // Spring Boot 3 기준
+
+
 	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
@@ -61,6 +66,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-admin:9.2.0'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+}
+sentry {
+	// 빌드 시 소스 코드를 Sentry에 업로드하여 에러 발생 지점을 정확히 파악하게 합니다.
+	includeSourceContext = true
+	org = "fillin-backend"
+	projectName = "fillin"
+	authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
 
 tasks.named('test') {

@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger", "/swagger/", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger 허용
                         .requestMatchers("/api/auth/kakao/callback","/api/auth/naver/callback").permitAll()
                         //.requestMatchers("/**").permitAll()     // 모든 요청 허용 (테스트용)
+                        .requestMatchers("/test-error", "/debug-sentry").permitAll()
                         .anyRequest().authenticated() //나머지 인증 필요
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

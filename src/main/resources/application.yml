@@ -106,7 +106,7 @@ gcv:
   api-key: ${GCV_API_KEY}
 
 sentry:
-  dsn: "https://838c6c72c5be300b505a48eef169a6f4@o4510876571402240.ingest.us.sentry.io/4510876717350912"
+  dsn: ${SENTRY_DSN}
 
   # 테스트 시에는 1.0으로 설정해서 모든 요청을 확인, 실제 운영 시에는 0.1(10%)
   traces-sample-rate: 1.0

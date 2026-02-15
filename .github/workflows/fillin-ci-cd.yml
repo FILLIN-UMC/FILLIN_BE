@@ -48,6 +48,8 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean bootJar -x test
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN}}
 
 
       - name: Set up Docker Buildx

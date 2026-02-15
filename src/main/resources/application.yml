@@ -59,6 +59,14 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 
+logging:
+  file:
+    #EC2 서버 내부 경로
+    name: /home/ubuntu/fillin/logs/application.log
+  logback:
+    rollingpolicy:
+      max-history: 7 # 로그 보관 기간 (서버 용량 관리용)
+      max-file-size: 10MB # 파일당 최대 용량
 
 server:
   tomcat:
@@ -96,3 +104,13 @@ gemini:
 
 gcv:
   api-key: ${GCV_API_KEY}
+
+sentry:
+  dsn: ${SENTRY_DSN}
+
+  # 테스트 시에는 1.0으로 설정해서 모든 요청을 확인, 실제 운영 시에는 0.1(10%)
+  traces-sample-rate: 1.0
+  exception-resolver-order: -2147483648
+  logging:
+    minimum-event-level: error # error 이상의 로그는 자동으로 Sentry 이슈로 생성
+    minimum-breadcrumb-level: info # info 이상의 로그는 에러 발생 시 '이전 기록'으로 함께 전송

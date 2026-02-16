@@ -6,11 +6,15 @@ services:
     image: ${DOCKERHUB_USERNAME}/fillin:latest
     env_file:
       - .env
+    volumes:
+      - /home/ubuntu/firebase-service-account.json:/app/firebase-key.json
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - TZ=Asia/Seoul
     ports:
       - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - fillin_network
     restart: unless-stopped

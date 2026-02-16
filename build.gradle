@@ -40,7 +40,9 @@ dependencies {
 
 	// Monitoring Sentry setting
 	implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.1.0' // Spring Boot 3 기준
-
+	// Grafana
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

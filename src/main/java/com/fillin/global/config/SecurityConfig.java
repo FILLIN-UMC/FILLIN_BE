@@ -46,9 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/api/auth/**").permitAll() // 인증 없이 접근 허용
                         .requestMatchers("/index.html", "/static/**", "/favicon.ico").permitAll() // 정적 파일 허용
-                        .requestMatchers("/swagger", "/swagger/", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger 허용
-                        .requestMatchers("/api/auth/kakao/callback","/api/auth/naver/callback").permitAll()
-                        //.requestMatchers("/**").permitAll()     // 모든 요청 허용 (테스트용)
+                        .requestMatchers("/actuator/prometheus", "/actuator/health/**", "/swagger/", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger 허용
                         .requestMatchers("/test-error", "/debug-sentry").permitAll()
                         .anyRequest().authenticated() //나머지 인증 필요
                 )

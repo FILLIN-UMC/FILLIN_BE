@@ -82,13 +82,20 @@ public class OAuthServiceImpl implements OAuthService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
 
+        if (member.isOnboarded()) {
+            throw new AuthException(ErrorCode.ALREADY_ONBOARDED_USER); // 400 에러로 우아하게 방어
+        }
+
+        if (req.getEmail() != null && !req.getEmail().equals(member.getEmail())) {
+            if (memberRepository.existsByEmail(req.getEmail())) {
+                throw new AuthException(ErrorCode.DUPLICATE_EMAIL);
+            }
+        }
         // 닉네임 중복 체크
         if (memberRepository.existsByNickname(req.getNickname())) {
             throw new AuthException(ErrorCode.DUPLICATE_NICKNAME);
         }
-        if (memberRepository.existsByEmail(req.getEmail())) {
-            throw new AuthException(ErrorCode.DUPLICATE_EMAIL);
-        }
+
         validateRequiredAgreements(req.getAgreedAgreementIds());
         // 이메일, 닉네임 저장
         member.updateNicknameAndEmail(req.getNickname(),req.getEmail());
@@ -122,6 +129,9 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     private void validateRequiredAgreements(List<Long> agreedIds) {
+        if (agreedIds == null || agreedIds.isEmpty()) {
+            throw new AuthException(ErrorCode.AGREEMENT_REQUIRED);
+        }
 
         List<Agreement> requiredAgreements = agreementRepository.findByRequiredTrue();
 

@@ -22,6 +22,8 @@ public enum ErrorCode implements BaseCode {
     USER_NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "USER_401", "로그인 하지 않았습니다."),
     USER_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "USER_403", "권한이 없습니다."),
     PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST, "AUTH_400_PW_MISMATCH", "비밀번호가 일치하지 않습니다."),
+    ALREADY_ONBOARDED_USER(HttpStatus.BAD_REQUEST, "AUTH_404", "이미 온보딩을 마친 회원입니다."),
+
 
     // Report Error
     REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "REPORT404", "제보를 찾을 수 없습니다."),

@@ -93,14 +93,17 @@ public class ReportAnalysisService {
             String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 
             String textPrompt = String.format("""
-                Analyze this image and provide a JSON output.
-                You MUST select the 'title' strictly from the predefined list below.
-                Only provide the 'title' field in JSON.
-                --- PREDEFINED TITLE LIST ---
-                %s
-                -----------------------------
-                DO NOT output markdown code blocks. Just raw JSON.
-                """, this.predefinedLabelsText);
+        이미지를 분석하여 다음 규칙에 따라 JSON으로 출력하세요.
+        1. 아래 제공된 [PREDEFINED TITLE LIST]에서 이미지와 가장 잘 맞는 'title'을 선택하세요.
+        2. 만약 리스트에 적합한 제목이 절대 없다면, 상황을 요약한 새로운 'title'을 직접 생성하세요. (10자 이내)
+        3. 'category'는 반드시 [DANGER, INCONVENIENCE, DISCOVERY] 중 하나여야 합니다.
+    
+        --- PREDEFINED TITLE LIST ---
+        %s
+        -----------------------------
+        출력 형식: {"title": "제목", "category": "카테고리"}
+        마크다운 코드 블록 없이 순수 JSON만 출력하세요.
+        """, this.predefinedLabelsText);
 
             Map<String, Object> requestBody = createRequestBody(textPrompt, base64Image);
             String apiUrl = geminiUrl + apiKey;
@@ -337,9 +340,24 @@ public class ReportAnalysisService {
         JsonNode rootNode = objectMapper.readTree(responseBody);
         String textResult = getTextFromCandidate(rootNode);
         textResult = textResult.replace("```json", "").replace("```", "").trim();
+
         JsonNode jsonResult = objectMapper.readTree(textResult);
         String title = jsonResult.path("title").asText("분석 불가");
-        ReportCategory category = titleCategoryMap.getOrDefault(title, ReportCategory.DISCOVERY);
+        String categoryStr = jsonResult.path("category").asText();
+
+        ReportCategory category;
+        // 1단계: 서버의 매핑 테이블에서 먼저 카테고리 확인 (일관성 유지)
+        if (titleCategoryMap.containsKey(title)) {
+            category = titleCategoryMap.get(title);
+        } else {
+            // 2단계: 리스트에 없는 제목인 경우, AI가 제안한 카테고리 사용 (유연성 확보)
+            try {
+                category = ReportCategory.valueOf(categoryStr.toUpperCase());
+            } catch (IllegalArgumentException | NullPointerException e) {
+                category = ReportCategory.DISCOVERY; // 최후의 기본값
+            }
+        }
+
         return new ReportAnalysisResponseDto(title, category);
     }
 

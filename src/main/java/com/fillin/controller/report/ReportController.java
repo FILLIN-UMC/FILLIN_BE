@@ -103,4 +103,18 @@ public class ReportController {
         ReportImageProcessResponse response = reportAnalysisService.processImageSmart(image);
         return Response.ok(response);
     }
+
+    @Operation(summary = "제보 전체 조회", description = "현재 지도 영역 내에 있는 모든 제보 마커를 조회합니다.")
+    @GetMapping("/map")
+    public Response<List<MapMarkerResponse>> getMapMarkers(
+            @RequestParam Double minLatitude,
+            @RequestParam Double maxLatitude,
+            @RequestParam Double minLongitude,
+            @RequestParam Double maxLongitude
+    ) {
+        List<MapMarkerResponse> markers = reportService.getMapMarkers(
+                minLatitude, maxLatitude, minLongitude, maxLongitude
+        );
+        return Response.ok(ResultCode.OK, markers);
+    }
 }

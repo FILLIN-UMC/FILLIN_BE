@@ -106,4 +106,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
                 @Param("lon") double lon,
                 Pageable pageable
         );
+
+    // 지도 영역 내의 모든 '게시된' 제보를 조회하는 메서드
+    List<Report> findByLatitudeBetweenAndLongitudeBetweenAndStatus(
+            Double minLatitude, Double maxLatitude,
+            Double minLongitude, Double maxLongitude,
+            ReportStatus status
+    );
 }

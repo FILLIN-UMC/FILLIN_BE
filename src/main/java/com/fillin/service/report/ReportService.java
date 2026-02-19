@@ -7,6 +7,7 @@ import com.fillin.domain.enums.ReportStatus;
 import com.fillin.domain.enums.ValidType;
 import com.fillin.dto.report.request.ReportCreateRequestDto;
 import com.fillin.dto.report.request.SearchResultReportRequest;
+import com.fillin.dto.report.response.MapMarkerResponse;
 import com.fillin.dto.report.response.PopularReportResponse;
 import com.fillin.dto.report.response.SearchResultReportResponse;
 import com.fillin.global.apiPayload.code.ErrorCode;
@@ -141,4 +142,29 @@ public class ReportService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<MapMarkerResponse> getMapMarkers(Double minLat, Double maxLat, Double minLon, Double maxLon) {
+        validateLocationRange(minLat, maxLat, minLon, maxLon);
+
+        // 게시된 제보만 조회
+        List<Report> reports = reportRepository.findByLatitudeBetweenAndLongitudeBetweenAndStatus(
+                minLat, maxLat, minLon, maxLon, ReportStatus.PUBLISHED
+        );
+
+        return reports.stream()
+                .map(report -> new MapMarkerResponse(
+                        report.getId(),
+                        report.getLatitude(),
+                        report.getLongitude(),
+                        report.getCategory(),
+                        report.getReportImageUrl()
+                ))
+                .toList();
+    }
+
+    private void validateLocationRange(Double minLat, Double maxLat, Double minLon, Double maxLon) {
+        if (minLat < -90 || maxLat > 90 || minLon < -180 || maxLon > 180 || minLat > maxLat || minLon > maxLon) {
+            throw new BusinessException(ErrorCode.INVALID_LOCATION_RANGE);
+        }
+    }
 }

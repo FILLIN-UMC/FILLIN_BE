@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.imageio.ImageIO;
@@ -105,7 +106,15 @@ public class ReportAnalysisService {
             Map<String, Object> requestBody = createRequestBody(textPrompt, base64Image);
             String apiUrl = geminiUrl + apiKey;
 
+            // GCV 분석 데이터 버퍼 용량 10MB로 확장 (256KB 에러 완벽 방지)
+            ExchangeStrategies strategies = ExchangeStrategies.builder()
+                    .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                    .build();
+
             String responseBody = webClientBuilder.build()
+                    .mutate()
+                    .exchangeStrategies(strategies)
+                    .build()
                     .post()
                     .uri(apiUrl)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -166,8 +175,15 @@ public class ReportAnalysisService {
                         )
                 ))
         );
+        // GCV 분석 데이터 버퍼 용량 10MB로 확장 (256KB 에러 완벽 방지)
+        ExchangeStrategies strategies = ExchangeStrategies.builder()
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
 
         String responseBody = webClientBuilder.build()
+                .mutate()
+                .exchangeStrategies(strategies)
+                .build()
                 .post()
                 .uri(GCV_URL + gcvApiKey)
                 .contentType(MediaType.APPLICATION_JSON)

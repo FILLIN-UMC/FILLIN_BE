@@ -2,6 +2,7 @@ package com.fillin.converter.report;
 
 import com.fillin.domain.Report;
 import com.fillin.dto.report.response.HotReportResponse;
+import com.fillin.dto.report.response.MapMarkerResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -18,5 +19,15 @@ public class ReportConverter {
                 .latitude(report.getLatitude())
                 .longitude(report.getLongitude())
                 .build();
+    }
+
+    public static MapMarkerResponse toMapMarkerResponse(Report report) {
+        return new MapMarkerResponse(
+                report.getId(),
+                report.getLatitude(),
+                report.getLongitude(),
+                report.getCategory(),
+                report.getReportImageUrl()
+        );
     }
 }
